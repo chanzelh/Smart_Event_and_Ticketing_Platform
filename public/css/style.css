@@ -88,3 +88,21 @@ body {
     background-color: var(--deep-charcoal);
     border-bottom: 1px solid var(--surface-gray);
 }
+
+/* Styling specifically for Auth Cards */
+.card.bg-surface {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.bg-surface:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(138, 43, 226, 0.2);
+    border-color: var(--electric-purple) !important;
+}
+
+/* Ensure labels are readable against dark bg */
+label.form-label {
+    color: var(--cyan-flash);
+    font-size: 0.9rem;
+    font-weight: 500;
+}

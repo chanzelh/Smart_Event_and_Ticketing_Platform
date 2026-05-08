@@ -15,6 +15,18 @@ app.get('/', (req, res) => {
     res.render('home'); // This looks for views/home.ejs
 });
 
+// 3. Define the Auth Page Route 
+app.get('/auth', (req, res) => {
+    // Express looks in 'views' by default, so we specify the subfolder
+    res.render('auth/auth'); 
+});
+
+// app.js
+const eventRoutes = require('./routes/eventRoutes');
+
+// Use the routes file and prefix it with /admin
+app.use('/admin', eventRoutes);
+
 // 4. Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -26,8 +26,16 @@
                     <li class="nav-item"><a class="nav-link text-white-50" href="/contact">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <a href="/dashboard" class="btn btn-gold me-3">Dashboard</a>
-                    <span class="text-white-50 small d-none d-lg-inline">Logged in as <strong class="gold-text">Admin</strong></span>
+                    <a href="/dashboard" class="btn btn-outline-light me-3">Dashboard</a>
+
+                    <% if (locals.user) { %>
+                        <span class="text-white-50 small d-none d-lg-inline">
+                            Logged in as <strong class="gold-text"><%= user.role %></strong>
+                        </span>
+                        <a href="/auth/logout" class="btn btn-sm btn-outline-secondary ms-3">Logout</a>
+                    <% } else { %>
+                        <a href="/auth" class="btn btn-gold">Login / Register</a>
+                    <% } %>
                 </div>
             </div>
         </div>
