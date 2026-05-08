@@ -1,47 +1,73 @@
 <%- include('partials/header') %>
 
 <main class="container py-5">
-    <h2 class="gold-text">Dashboard: <%= user.role %> View</h2>
+    <div class="mb-5">
+        <h1 class="fw-bold text-white">Hello, <span class="gold-text"><%= user.name %></span></h1>
+        <p class="text-white-50">Role: <span class="badge border border-gold gold-text"><%= user.role %></span></p>
+    </div>
 
     <% if (user.role === 'Admin') { %>
-        <section class="admin-stats row g-3 mb-5">
-            <div class="col-md-4"><div class="card bg-surface p-3 border-gold"><h4>Total Platform Revenue</h4><p>R150,000</p></div></div>
-            <div class="col-md-4"><div class="card bg-surface p-3"><h4>Pending Approvals</h4><p>5 Events</p></div></div>
-            <div class="col-md-4"><div class="card bg-surface p-3"><h4>Total Users</h4><p>1,200</p></div></div>
-        </section>
-
-    <% } else if (user.role === 'Merchant') { %>
-        <section class="merchant-stats mb-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="text-white">My Hosted Events</h3>
-                <a href="/admin/manage" class="btn btn-gold">Create New Event</a>
+        <h3 class="mb-4 gold-text">Platform Overview</h3>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card bg-surface border-secondary p-4 text-center">
+                    <h2 class="display-4 fw-bold text-white"><%= events.length %></h2>
+                    <p class="text-white-50 mb-0">Total Events</p>
+                </div>
             </div>
-            <div class="card bg-surface border-secondary">
-                <table class="table table-dark mb-0">
+            <div class="col-md-4">
+                <div class="card bg-surface border-secondary p-4 text-center border-gold">
+                    <h2 class="display-4 fw-bold text-white">5</h2>
+                    <p class="text-white-50 mb-0">Pending Approvals</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-surface border-secondary p-4 text-center">
+                    <h2 class="display-4 fw-bold text-white">R<%= events.reduce((acc, curr) => acc + curr.price, 0) %></h2>
+                    <p class="text-white-50 mb-0">Potential Revenue</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="mb-4 gold-text">Global Event Tracking</h3>
+        <div class="card bg-surface border-secondary shadow">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
                     <thead>
-                        <tr>
+                        <tr class="border-bottom border-secondary">
                             <th>Event</th>
+                            <th>Price</th>
                             <th>Status</th>
-                            <th>Tickets Sold</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Jonoefen LIVE</td>
-                            <td><span class="badge bg-warning text-dark">Pending Admin Approval</span></td>
-                            <td>0/100</td>
-                            <td><button class="btn btn-sm btn-outline-light">Edit</button></td>
-                        </tr>
+                        <% events.forEach(event => { %>
+                            <tr>
+                                <td><%= event.title %></td>
+                                <td>R<%= event.price %></td>
+                                <td><span class="badge bg-success">Active</span></td>
+                            </tr>
+                        <% }); %>
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
+
+    <% } else if (user.role === 'Merchant') { %>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="gold-text">Your Event Portfolio</h3>
+            <a href="/admin/manage" class="btn btn-gold">Build New Event</a>
+        </div>
+        <div class="card bg-surface border-secondary shadow p-5 text-center">
+            <p class="text-white-50">Merchant event tracking logic will appear here.</p>
+        </div>
 
     <% } else { %>
-        <h3 class="text-white">My Bookings</h3>
-        <div class="card bg-surface border-secondary">
-            </div>
+        <h3 class="mb-4 gold-text">My Tickets</h3>
+        <div class="card bg-surface border-secondary shadow p-5 text-center">
+            <p class="text-white-50">You haven't booked any events yet.</p>
+            <a href="/" class="btn btn-outline-gold mt-2">Browse Shows</a>
+        </div>
     <% } %>
 </main>
 

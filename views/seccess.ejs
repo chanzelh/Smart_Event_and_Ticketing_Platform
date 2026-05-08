@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+
+<main class="container py-5 text-center">
+    <div class="card bg-surface border-secondary p-5 shadow-lg mx-auto" style="max-width: 600px;">
+        <div class="mb-4">
+            <i class="bi bi-check-circle gold-text" style="font-size: 4rem;"></i>
+        </div>
+        <h2 class="fw-bold text-white mb-3">Order Confirmed!</h2>
+        <p class="text-white-50 mb-4">
+            A confirmation email with your digital tickets has been sent to your inbox. 
+            You can also download your tickets directly below.
+        </p>
+
+        <div class="d-grid gap-3">
+            <a href="/downloads/ticket-sample.pdf" class="btn btn-gold btn-lg">
+                <i class="bi bi-download"></i> Download PDF Tickets
+            </a>
+            <a href="/" class="btn btn-outline-light">Return to Home</a>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

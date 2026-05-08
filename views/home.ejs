@@ -1,27 +1,35 @@
 <%- include('partials/header') %>
 
-<section class="hero-section position-relative overflow-hidden">
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            <div class="col-12 featured-event-bg" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/featured-bg.jpg') center/cover no-repeat; height: 500px;">
-                <div class="container h-100 d-flex align-items-center">
-                    <div class="hero-content">
-                        <span class="badge bg-gold text-dark mb-2 fw-bold">FEATURED EVENT</span>
-                        <h1 class="display-3 fw-bold text-white mb-3">Jonoefen LIVE at work</h1>
-                        <p class="lead text-white-50 mb-4">
-                            <i class="bi bi-geo-alt gold-text"></i> 123 Kalk Street
-                            <span class="mx-2">|</span> 
-                            <i class="bi bi-calendar-event gold-text"></i> Sat, 09 May 2026
-                        </p>
-                        <a href="/events/featured" class="btn btn-gold btn-lg">View Details <i class="bi bi-arrow-right"></i></a>
+<section id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <% events.slice(0, 3).forEach((event, index) => { %>
+            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                <div class="featured-event-bg" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('<%= event.image %>') center/cover no-repeat; height: 500px;">
+                    <div class="container h-100 d-flex align-items-center">
+                        <div class="hero-content">
+                            <span class="badge bg-gold text-dark mb-2 fw-bold">FEATURED: <%= event.category.toUpperCase() %></span>
+                            <h1 class="display-3 fw-bold text-white mb-3"><%= event.title %></h1>
+                            <p class="lead text-white-50 mb-4">
+                                <i class="bi bi-geo-alt gold-text"></i> <%= event.venue %>
+                                <span class="mx-2">|</span> 
+                                <i class="bi bi-calendar-event gold-text"></i> <%= event.date %>
+                            </p>
+                            <a href="/events/<%= event.id %>" class="btn btn-gold btn-lg">View Details <i class="bi bi-arrow-right"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        <% }) %>
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
 </section>
 
-<section class="filter-bar py-4 sticky-top bg-dark border-bottom border-secondary">
+<section class="filter-bar py-4 border-bottom border-secondary">
     <div class="container">
         <form action="/events/search" method="GET" class="row g-2">
             <div class="col-md-5">
@@ -34,48 +42,43 @@
                 <select name="category" class="form-select bg-surface border-secondary text-white">
                     <option value="">All Categories</option>
                     <option value="Concert">Music & Concerts</option>
-                    <option value="Conference">Corporate Conferences</option>
+                    <option value="Conference">Corporate</option>
                     <option value="Workshop">Workshops</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="availability" class="form-select bg-surface border-secondary text-white">
-                    <option value="all">Availability</option>
-                    <option value="available">Tickets Available</option>
-                    <option value="sold-out">Sold Out</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-gold w-100">Apply Filters</button>
+                <button type="submit" class="btn btn-gold w-100">Filter</button>
             </div>
         </form>
     </div>
 </section>
 
 <main class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Upcoming Shows and Events</h2>
-        <a href="/events" class="text-gold text-decoration-none small">View All Events <i class="bi bi-arrow-right"></i></a>
-    </div>
-
+    <h2 class="fw-bold mb-4">Upcoming Shows and Events</h2>
     <div class="row row-cols-1 row-cols-md-3 g-4">
-        <div class="col">
-            <div class="card h-100 bg-surface border-secondary event-card">
-                <img src="/images/event-placeholder.jpeg" class="card-img-top" alt="Event Image">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="gold-text fw-bold text-uppercase">Music</small>
-                        <small class="text-white-50">R250 / Person</small>
+        <% events.forEach(event => { %>
+            <div class="col">
+                <div class="card h-100 bg-surface border-secondary event-card">
+                    <img src="<%= event.image %>" class="card-img-top" alt="<%= event.title %>" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="gold-text fw-bold text-uppercase"><%= event.category %></small>
+                            <small class="text-white-50">R<%= event.price %></small>
+                        </div>
+                        <h5 class="card-title text-white"><%= event.title %></h5>
+                        <p class="card-text text-white-50 small"><%= event.venue %></p>
                     </div>
-                    <h5 class="card-title text-white">Example Concert Name</h5>
-                    <p class="card-text text-white-50 small">Limited tickets available for this exclusive venue.</p>
-                </div>
-                <div class="card-footer bg-transparent border-top border-secondary">
-                    <a href="/events/id" class="btn btn-outline-light w-100">Get Tickets</a>
+                    <div class="card-footer bg-transparent border-top border-secondary">
+                        <% if (event.capacity > 0) { %>
+                            <a href="/events/<%= event.id %>" class="btn btn-outline-light w-100">Get Tickets</a>
+                        <% } else { %>
+                            <button class="btn btn-secondary w-100" disabled>Sold Out</button>
+                        <% } %>
+                    </div>
                 </div>
             </div>
-        </div>
-        </div>
+        <% }) %>
+    </div>
 </main>
 
 <%- include('partials/footer') %>

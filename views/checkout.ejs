@@ -1,0 +1,34 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="gold-text mb-4">Checkout</h2>
+            
+            <% if (!locals.user) { %>
+                <div class="card bg-surface border-secondary mb-4 p-4 text-center">
+                    <h5>New here? You can check out as a guest.</h5>
+                    <p class="text-white-50">Or <a href="/auth" class="gold-text">Sign In</a> to save this to your account history.</p>
+                </div>
+            <% } %>
+
+            <form action="/checkout/complete" method="POST" class="card bg-surface border-secondary p-4 shadow">
+                <h5 class="mb-3">Delivery Information</h5>
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" value="<%= locals.user ? user.name : '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email Address (Tickets will be sent here)</label>
+                    <input type="email" class="form-control" value="<%= locals.user ? user.email : '' %>" required>
+                </div>
+                
+                <hr class="border-secondary my-4">
+                
+                <button type="submit" class="btn btn-gold btn-lg w-100">Complete Order & Send Tickets</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

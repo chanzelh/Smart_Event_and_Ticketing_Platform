@@ -12,7 +12,7 @@
     <nav class="navbar navbar-expand-lg border-bottom border-secondary py-2">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="/images/tckt_logo.png" alt="TCKT Logo" height="45" class="me-2 rounded">
+                <img src="/images/tckt_logo.png" alt="TCKT Logo" height="55" class="me-2 rounded">
                 <span class="luxe-brand text-white">Event</span><span class="gold-text">Pro</span>
             </a>
             
@@ -26,17 +26,14 @@
                     <li class="nav-item"><a class="nav-link text-white-50" href="/contact">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <a href="/dashboard" class="btn btn-outline-light me-3">Dashboard</a>
+    <a href="/dashboard" class="btn btn-outline-light me-3">Dashboard</a>
 
-                    <% if (locals.user) { %>
-                        <span class="text-white-50 small d-none d-lg-inline">
-                            Logged in as <strong class="gold-text"><%= user.role %></strong>
-                        </span>
-                        <a href="/auth/logout" class="btn btn-sm btn-outline-secondary ms-3">Logout</a>
-                    <% } else { %>
-                        <a href="/auth" class="btn btn-gold">Login / Register</a>
-                    <% } %>
-                </div>
+    <% if (locals.user && user) { %>
+    <span class="gold-text">Logged in as: <%= user.role %></span>
+<% } else { %>
+    <span class="text-white-50">Guest Mode</span>
+<% } %>
+</div>
             </div>
         </div>
     </nav>
