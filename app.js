@@ -1,43 +1,55 @@
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
+const session = require('express-session');
 
-// Load environment variables 
 dotenv.config();
+
+const connectDB = require('./config/db');
+connectDB();
 
 const app = express();
 
-// 1. Import Routes from your 'routes' folder [cite: 109]
+// Import routes
 const indexRoutes = require('./routes/indexRoutes');
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 
-// 2. Set EJS as the template engine [cite: 16, 95]
+// Set EJS as the template engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 3. Middleware
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public'))); // Serves CSS and Images 
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 4. Register Routes [cite: 43, 93]
-// indexRoutes handles '/', '/dashboard', and '/contact' [cite: 182, 185, 186]
-app.use('/', indexRoutes); 
+// Session middleware
+// This must come BEFORE your routes
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'temporarysecret',
+    resave: false,
+    saveUninitialized: false
+}));
 
-// authRoutes handles '/auth' for login and registration [cite: 51, 183]
+// Makes the logged-in user available inside all EJS pages
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+});
+
+// Register routes
+app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
-
-// eventRoutes handles '/admin' prefix for '/manage' [cite: 56, 184]
 app.use('/admin', eventRoutes);
 
-// 5. Global Error Handling Middleware [cite: 106, 167]
+// Global error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something went wrong on the server!');
 });
 
-// 6. Start the Server [cite: 139]
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
