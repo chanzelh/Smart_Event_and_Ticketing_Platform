@@ -18,4 +18,13 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong.');
 });
 
+/*-------Example Middleware-------*/
+function isAdmin(req, res, next) {
+    if (req.session.user && req.session.user.role === 'Admin') {
+        next();
+    } else {
+        res.status(403).send("Access Denied");
+    }
+}
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
