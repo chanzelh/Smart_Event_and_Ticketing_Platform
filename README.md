@@ -18,6 +18,11 @@ This entire system was developed using Node.js, Express.js, EJS and MongoDB and 
 - View the booking analytics dashboard
 - Manage customer enquiries
 
+### Merchant Features
+- Able to create events
+- Able to view analytics of events created by them
+- Needs approval from admin before publishing events
+
 ---
 ## Technologies Used
 
@@ -79,7 +84,7 @@ project-root/
 |-----------|-----------|----------------|
 | Chanzel Hammond | Documentation & Coordination | README, GitHub management, presentation preparation |
 | Edward Goosen | Backend Developer | Authentication and business logic |
-| Jonathan Rossouw | Frontend Developer | EJS templates and styling |
+| Jonathan Rossouw | Frontend Developer & Team Lead | EJS templates and styling |
 | Dewald Allers | Database Engineer | MongoDB schemas and validation |
 | Gerald Enright | Security / DevOps Engineer | Middleware, RBAC, environment configuration |
 
