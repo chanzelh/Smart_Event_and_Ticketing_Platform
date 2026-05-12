@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "smart_event_and_ticketing_platform",
   "version": "1.0.0",
   "description": "Smart Event and Ticketing Platform - Tckt System",
@@ -21,13 +20,10 @@
     "url": "https://github.com/chanzelh/Smart_Event_and_Ticketing_Platform/issues"
   },
   "homepage": "https://github.com/chanzelh/Smart_Event_and_Ticketing_Platform#readme",
-=======
->>>>>>> task-4-frontend-logic
   "dependencies": {
     "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
-<<<<<<< HEAD
     "express-session": "^1.19.0",
     "mongoose": "^9.6.2",
     "pdfkit": "^0.13.0",
@@ -37,9 +33,3 @@
     "nodemon": "^3.1.14"
   }
 }
-=======
-    "pdfkit": "^0.13.0",
-  "qrcode": "^1.5.3"
-  }
-}
->>>>>>> task-4-frontend-logic
