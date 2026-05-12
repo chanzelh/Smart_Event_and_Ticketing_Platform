@@ -209,9 +209,9 @@ router.get('/checkout', (req, res) => {
 });
 
 router.post('/checkout/complete', (req, res) => {
-    // We pass a simulated user or null, plus any other data the header needs
     res.render('success', { 
-        user: { name: 'Guest', role: 'User' } // Providing a default object prevents header crashes
+        user: { name: 'Jono', role: 'User' },
+        cartItem: mockEvents[0] // Change this index to match the user's selection later
     });
 });
 
