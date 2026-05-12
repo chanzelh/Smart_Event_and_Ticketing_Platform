@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // or 'bcrypt'
+const User = require('../models/User'); // Path to your User model
 
 /*-----Registration Logic----*/
 exports.register = (req, res) => {
@@ -17,13 +17,18 @@ exports.register = (req, res) => {
 
 /*-----Login Logic-----*/
 exports.login = async (req, res) => {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
 
-    if (user && await bcrypt.compare(password, user.password)) {
-        req.session.user = { id: user._id, role: user.role };
-        res.redirect('/dashboard');
-    } else {
-        res.send("Invalid credentials.");
+        if (user && await bcrypt.compare(password, user.password)) {
+            req.session.user = { id: user._id, role: user.role };
+            res.redirect('/dashboard');
+        } else {
+            res.send("Invalid credentials.");
+        }
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).send("An error occurred during login.");
     }
 };
