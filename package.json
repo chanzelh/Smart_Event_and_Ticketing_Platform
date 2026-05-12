@@ -1,33 +1,25 @@
 {
-<<<<<<< HEAD
-  "name": "project",
-  "version": "1.0.0",
-  "description": "",
-=======
   "name": "wpr381-project",
   "version": "1.0.0",
->>>>>>> task-1-setup-auth
-  "main": "index.js",
+  "description": "Tckt System Project",
+  "main": "app.js",
+  "type": "commonjs",
   "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Jono",
   "license": "ISC",
-<<<<<<< HEAD
-  "type": "commonjs",
   "dependencies": {
     "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pdfkit": "^0.13.0",
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
-=======
-  "description": "",
-  "dependencies": {
-    "ejs": "^5.0.2",
-    "express": "^5.2.1"
->>>>>>> task-1-setup-auth
   }
 }
