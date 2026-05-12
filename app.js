@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
+// 1. Ensure these are correctly imported (Done)
+const { isAuthenticated, authorizeRoles } = require('./middleware/authMiddleware');
 
 dotenv.config();
 
@@ -11,9 +13,9 @@ connectDB();
 const app = express();
 
 // Import routes
-const indexRoutes = require('./routes/indexRoutes');
-const authRoutes = require('./routes/authRoutes');
-const eventRoutes = require('./routes/eventRoutes');
+const indexRoutes = require('./routes/indexRoutes.js');
+const authRoutes = require('./routes/authRoutes.js');
+const eventRoutes = require('./routes/eventRoutes.js');
 
 // Set EJS as the template engine
 app.set('view engine', 'ejs');
@@ -25,11 +27,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session middleware
-// This must come BEFORE your routes
 app.use(session({
     secret: process.env.SESSION_SECRET || 'temporarysecret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: { secure: false } // Set to true if using HTTPS
 }));
 
 // Makes the logged-in user available inside all EJS pages
@@ -38,14 +40,20 @@ app.use((req, res, next) => {
     next();
 });
 
-// Register routes
+// --- REGISTER ROUTES ---
+
+// Public Routes
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
-app.use('/admin', eventRoutes);
+
+// 2. Protected Admin Routes
+// This ensures only logged-in users with the 'admin' role can access /admin/...
+app.use('/admin', isAuthenticated, authorizeRoles('admin'), eventRoutes);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
+    // Custom error page or message
     res.status(500).send('Something went wrong on the server!');
 });
 

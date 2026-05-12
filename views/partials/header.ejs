@@ -28,11 +28,16 @@
                 <div class="d-flex align-items-center">
     <a href="/dashboard" class="btn btn-outline-light me-3">Dashboard</a>
 
-    <% if (locals.user && user) { %>
-    <span class="gold-text">Logged in as: <%= user.role %></span>
-<% } else { %>
-    <span class="text-white-50">Guest Mode</span>
-<% } %>
+    <div class="auth-nav">
+    <% if (user) { %>
+        <span class="gold-text">
+            <i class="fas fa-user-shield"></i> <%= user.role.toUpperCase() %>: <%= user.fullName %>
+        </span>
+        <a href="/auth/logout" class="nav-link text-danger ms-3">Logout</a>
+    <% } else { %>
+        <a href="/auth/login" class="btn btn-outline-primary btn-sm">Login / Register</a>
+    <% } %>
+</div>
 </div>
             </div>
         </div>
