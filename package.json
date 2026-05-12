@@ -2,6 +2,8 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pdfkit": "^0.13.0",
+  "qrcode": "^1.5.3"
   }
 }

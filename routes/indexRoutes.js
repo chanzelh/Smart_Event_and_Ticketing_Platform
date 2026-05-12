@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { generateTicketPDF } = require('../utils/ticketGenerator'); // Import the helper
 
 // MOVED OUTSIDE: Globally available to all routes in this file
 const mockEvents = [
@@ -213,6 +214,30 @@ router.post('/checkout/complete', (req, res) => {
         user: { name: 'Jono', role: 'User' },
         cartItem: mockEvents[0] // Change this index to match the user's selection later
     });
+});
+
+router.get('/downloads/ticket', async (req, res) => { // Added async here
+    try {
+        const ticketData = {
+            eventName: "WPR381 Final Project Showcase",
+            userName: "Jono",
+            eventDate: "2026-06-20",
+            orderId: "TK-99821" // This will be encoded in the QR
+        };
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=Tckt-Order.pdf');
+
+        // Note: we await the function call now
+        await generateTicketPDF(
+            (chunk) => res.write(chunk),
+            () => res.end(),
+            ticketData
+        );
+    } catch (error) {
+        console.error("PDF Generation Error:", error);
+        res.status(500).send("Error generating ticket");
+    }
 });
 
 module.exports = router;
