@@ -1,7 +1,7 @@
 {
-  "name": "wpr381-project",
+  "name": "smart_event_and_ticketing_platform",
   "version": "1.0.0",
-  "description": "Tckt System Project",
+  "description": "Smart Event and Ticketing Platform - Tckt System",
   "main": "app.js",
   "type": "commonjs",
   "scripts": {
@@ -9,13 +9,23 @@
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chanzelh/Smart_Event_and_Ticketing_Platform.git"
+  },
   "keywords": [],
   "author": "Jono",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chanzelh/Smart_Event_and_Ticketing_Platform/issues"
+  },
+  "homepage": "https://github.com/chanzelh/Smart_Event_and_Ticketing_Platform#readme",
   "dependencies": {
     "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.6.2",
     "pdfkit": "^0.13.0",
     "qrcode": "^1.5.3"
   },
