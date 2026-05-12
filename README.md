@@ -49,8 +49,11 @@ This entire system was developed using Node.js, Express.js, EJS and MongoDB and 
 ## MVC Architecture
 
 project-root/
+
 ├── config/
+
 ├── controllers/
+
 ├── middleware/
 ├── models/
 ├── routes/
