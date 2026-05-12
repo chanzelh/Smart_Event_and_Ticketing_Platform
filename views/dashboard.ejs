@@ -1,74 +1,164 @@
 <%- include('partials/header') %>
 
-<main class="container py-5">
-    <div class="mb-5">
-        <h1 class="fw-bold text-white">Hello, <span class="gold-text"><%= user.name %></span></h1>
-        <p class="text-white-50">Role: <span class="badge border border-gold gold-text"><%= user.role %></span></p>
-    </div>
+<div class="container py-5">
+    <h1 class="gold-text mb-4">Dashboard</h1>
 
-    <% if (user.role === 'Admin') { %>
-        <h3 class="mb-4 gold-text">Platform Overview</h3>
+    <% if (typeof user !== 'undefined' && user) { %>
+        <p class="text-white-50">
+            Logged in as:
+            <strong><%= user.fullName || user.name || user.email %></strong>
+            (<%= user.role %>)
+        </p>
+    <% } %>
+
+    <hr class="border-secondary mb-4">
+
+    <% 
+        const safeTotalEvents = typeof totalEvents !== 'undefined' ? totalEvents : 0;
+        const safeTotalBookings = typeof totalBookings !== 'undefined' ? totalBookings : 0;
+        const safeTotalRevenue = typeof totalRevenue !== 'undefined' ? totalRevenue : 0;
+        const safePopularEvents = typeof popularEvents !== 'undefined' ? popularEvents : [];
+        const safeBookings = typeof bookings !== 'undefined' ? bookings : [];
+    %>
+
+    <% if (user && (user.role === 'Admin' || user.role === 'Merchant')) { %>
+
         <div class="row g-4 mb-5">
             <div class="col-md-4">
-                <div class="card bg-surface border-secondary p-4 text-center">
-                    <h2 class="display-4 fw-bold text-white"><%= events.length %></h2>
+                <div class="card bg-surface border-secondary p-4 text-center shadow">
+                    <h2 class="display-4 fw-bold text-white">
+                        <%= safeTotalEvents %>
+                    </h2>
                     <p class="text-white-50 mb-0">Total Events</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="card bg-surface border-secondary p-4 text-center border-gold">
-                    <h2 class="display-4 fw-bold text-white">5</h2>
-                    <p class="text-white-50 mb-0">Pending Approvals</p>
+                <div class="card bg-surface border-secondary p-4 text-center shadow">
+                    <h2 class="display-4 fw-bold text-white">
+                        <%= safeTotalBookings %>
+                    </h2>
+                    <p class="text-white-50 mb-0">Total Bookings</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="card bg-surface border-secondary p-4 text-center">
-                    <h2 class="display-4 fw-bold text-white">R<%= events.reduce((acc, curr) => acc + curr.price, 0) %></h2>
-                    <p class="text-white-50 mb-0">Potential Revenue</p>
+                <div class="card bg-surface border-secondary p-4 text-center shadow">
+                    <h2 class="display-4 fw-bold text-white">
+                        R<%= safeTotalRevenue.toFixed ? safeTotalRevenue.toFixed(2) : safeTotalRevenue %>
+                    </h2>
+                    <p class="text-white-50 mb-0">Total Revenue</p>
                 </div>
             </div>
         </div>
 
-        <h3 class="mb-4 gold-text">Global Event Tracking</h3>
-        <div class="card bg-surface border-secondary shadow">
-            <div class="table-responsive">
-                <table class="table table-dark table-hover mb-0">
-                    <thead>
-                        <tr class="border-bottom border-secondary">
-                            <th>Event</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% events.forEach(event => { %>
+        <div class="card bg-surface border-secondary p-4 shadow mb-5">
+            <h3 class="gold-text mb-3">
+                <% if (user.role === 'Admin') { %>
+                    Platform Analytics
+                <% } else { %>
+                    Merchant Analytics
+                <% } %>
+            </h3>
+
+            <% if (safePopularEvents.length === 0) { %>
+                <p class="text-white-50 mb-0">No booking data available yet.</p>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="table table-dark table-bordered table-hover align-middle">
+                        <thead>
                             <tr>
-                                <td><%= event.title %></td>
-                                <td>R<%= event.price %></td>
-                                <td><span class="badge bg-success">Active</span></td>
+                                <th>Event</th>
+                                <th>Tickets Sold</th>
+                                <th>Revenue</th>
                             </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            <% safePopularEvents.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <%= item.event && item.event.title ? item.event.title : 'Unknown Event' %>
+                                    </td>
+                                    <td>
+                                        <%= item.totalTicketsSold || 0 %>
+                                    </td>
+                                    <td>
+                                        R<%= item.totalRevenue ? item.totalRevenue.toFixed(2) : '0.00' %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
         </div>
 
-    <% } else if (user.role === 'Merchant') { %>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="gold-text">Your Event Portfolio</h3>
-            <a href="/admin/manage" class="btn btn-gold">Build New Event</a>
-        </div>
-        <div class="card bg-surface border-secondary shadow p-5 text-center">
-            <p class="text-white-50">Merchant event tracking logic will appear here.</p>
+        <div class="mb-4">
+            <% if (user.role === 'Admin' || user.role === 'Merchant') { %>
+                <a href="/admin/manage" class="btn btn-gold">
+                    Manage Events
+                </a>
+            <% } %>
         </div>
 
     <% } else { %>
-        <h3 class="mb-4 gold-text">My Tickets</h3>
-        <div class="card bg-surface border-secondary shadow p-5 text-center">
-            <p class="text-white-50">You haven't booked any events yet.</p>
-            <a href="/" class="btn btn-outline-gold mt-2">Browse Shows</a>
+
+        <div class="card bg-surface border-secondary p-4 shadow">
+            <h3 class="gold-text mb-3">My Bookings</h3>
+
+            <% if (safeBookings.length === 0) { %>
+                <p class="text-white-50 mb-0">You do not have any bookings yet.</p>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="table table-dark table-bordered table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Quantity</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Booked On</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% safeBookings.forEach(booking => { %>
+                                <tr>
+                                    <td>
+                                        <%= booking.event && booking.event.title ? booking.event.title : 'Unknown Event' %>
+                                    </td>
+                                    <td>
+                                        <%= booking.quantity %>
+                                    </td>
+                                    <td>
+                                        R<%= booking.totalPrice ? booking.totalPrice.toFixed(2) : '0.00' %>
+                                    </td>
+                                    <td>
+                                        <%= booking.bookingStatus %>
+                                    </td>
+                                    <td>
+                                        <%= booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <% if (booking.bookingStatus !== 'Cancelled') { %>
+                                            <form action="/admin/bookings/<%= booking._id %>/cancel" method="POST">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <span class="text-white-50">Cancelled</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
         </div>
+
     <% } %>
-</main>
+</div>
 
 <%- include('partials/footer') %>

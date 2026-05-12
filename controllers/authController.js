@@ -1,75 +1,85 @@
-const bcrypt = require('bcrypt'); // or 'bcrypt'
-const User = require('../models/User'); // Path to your User model
+const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
-/*-----Registration Logic----*/
+/*----- Registration Logic ----*/
 exports.register = async (req, res) => {
     try {
-        const { fullName, email, password, role } = req.body;
-        
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        const newUser = new User({ 
-            fullName,
-            email,
-            username: email, // ✅ This maps the Email Address to the Username field
-            password: hashedPassword, 
-            role: role || 'user' 
-        });
-        
-        await newUser.save();
-        res.redirect('/auth/login?success=true');
-    } catch (err) {
-        console.error("DETAILED REGISTER ERROR:", err);
-        res.status(500).send("Error registering user: " + err.message);
-    if (err.code === 11000) {
-        return res.status(400).send("That email is already registered. Please login instead.");
-    }
-    console.error("Reg Error:", err);
-    res.status(500).send("Error registering user: " + err.message);
-}
-};
+        const { fullName, email, password, confirmPassword, role } = req.body;
 
-/*-----Login Logic-----*/
-exports.login = async (req, res) => {
-    console.log("RAW BODY RECEIVED:", req.body);
-    try {
-        let { username, password } = req.body;
-
-        // 1. Normalize the email (username) to lowercase
-        // This prevents login failure if the user types "John@Gmail.com" 
-        // but registered as "john@gmail.com"
-        const cleanUsername = username.trim().toLowerCase();
-
-        const user = await User.findOne({ username: cleanUsername });
-
-        console.log("--- Login Debug ---");
-        console.log("Searching for:", cleanUsername);
-        console.log("User found in DB:", user ? "Yes" : "No");
-        
-        if (user) {
-            const isMatch = await bcrypt.compare(password, user.password);
-            console.log("Password Match:", isMatch);
-            
-            if (isMatch) {
-                // Store minimal info in session
-                req.session.user = { 
-                    id: user._id, 
-                    role: user.role, 
-                    fullName: user.fullName,
-                    username: user.username 
-                };
-                
-                console.log("Session set for:", user.username);
-                return res.redirect('/'); 
-            }
+        if (!fullName || !email || !password || !confirmPassword || !role) {
+            return res.status(400).send('Please fill in all fields.');
         }
 
-        // If we get here, either user wasn't found or password failed
-        res.send("Invalid credentials.");
+        if (password !== confirmPassword) {
+            return res.status(400).send('Passwords do not match.');
+        }
 
-    } catch (error) {
-        console.error("Critical Login Error:", error);
-        res.status(500).send("Login Error");
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return res.status(400).send('A user with this email already exists.');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            fullName,
+            email,
+            password: hashedPassword,
+            role
+        });
+
+        await newUser.save();
+
+        res.redirect('/auth');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error registering user.');
     }
+};
+
+/*----- Login Logic ----*/
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.send('Invalid credentials.');
+        }
+
+        const passwordMatches = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatches) {
+            return res.send('Invalid credentials.');
+        }
+
+        req.session.user = {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role
+        };
+
+        if (user.role === 'Admin') {
+            return res.redirect('/admin/dashboard');
+        }
+
+        if (user.role === 'Merchant') {
+            return res.redirect('/admin/merchant/dashboard');
+        }
+
+        return res.redirect('/');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error logging in.');
+    }
+};
+
+/*----- Logout Logic ----*/
+exports.logout = (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/auth');
+    });
 };

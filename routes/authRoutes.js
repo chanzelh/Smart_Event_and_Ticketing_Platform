@@ -2,24 +2,22 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-// --- GET Routes (Displaying the Forms) ---
+const authController = require('../controllers/authController');
 
-// If your login/register are on separate pages:
-router.get('/login', (req, res) => {
-    const success = req.query.success; 
-    res.render('auth/auth', { success: success }); 
-});
-router.get('/login', (req, res) => res.render('auth/auth'));
-
-// If you are using that combined 'auth/auth.ejs' view you mentioned:
+// Show login/register page
 router.get('/', (req, res) => {
-    res.render('auth/auth'); 
+    res.render('auth/auth', {
+        user: req.session ? req.session.user : null
+    });
 });
 
-// --- POST Routes (Handling the Logic) ---
-
-// These now point to the functions we just fixed in the controller
+// Register new user
 router.post('/register', authController.register);
+
+// Login existing user
 router.post('/login', authController.login);
+
+// Logout user
+router.get('/logout', authController.logout);
 
 module.exports = router;

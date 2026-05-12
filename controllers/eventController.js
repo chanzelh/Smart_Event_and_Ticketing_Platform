@@ -3,7 +3,7 @@
 const Event = require('../models/Event');
 const Booking = require('../models/Booking');
 
-// Show all approved events to normal users
+// Show all approved events on the home page
 exports.getAllEvents = async (req, res, next) => {
     try {
         const { search, category } = req.query;
@@ -36,7 +36,8 @@ exports.getAllEvents = async (req, res, next) => {
 // Show one event's details
 exports.getEventDetails = async (req, res, next) => {
     try {
-        const event = await Event.findById(req.params.id).populate('createdBy', 'name email role');
+        const event = await Event.findById(req.params.id)
+            .populate('createdBy', 'fullName email role');
 
         if (!event) {
             return res.status(404).send('Event not found');
@@ -57,9 +58,12 @@ exports.showManageEvents = async (req, res, next) => {
         let events;
 
         if (req.session.user.role === 'Admin') {
-            events = await Event.find().populate('createdBy', 'name email role').sort({ createdAt: -1 });
+            events = await Event.find()
+                .populate('createdBy', 'fullName email role')
+                .sort({ createdAt: -1 });
         } else {
-            events = await Event.find({ createdBy: req.session.user.id }).sort({ createdAt: -1 });
+            events = await Event.find({ createdBy: req.session.user.id })
+                .sort({ createdAt: -1 });
         }
 
         res.render('admin/manage', {
@@ -69,15 +73,6 @@ exports.showManageEvents = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-};
-
-// Show create event form
-exports.showCreateEventForm = (req, res) => {
-    res.render('admin/manage', {
-        events: [],
-        user: req.session.user,
-        showCreateForm: true
-    });
 };
 
 // Create a new event
@@ -94,15 +89,19 @@ exports.createEvent = async (req, res, next) => {
             artworkUrl
         } = req.body;
 
-        const capacityNumber = Number(totalCapacity);
         const priceNumber = Number(ticketPrice);
+        const capacityNumber = Number(totalCapacity);
 
-        if (capacityNumber < 1) {
-            return res.status(400).send('Total capacity must be at least 1.');
+        if (!title || !description || !category || !venueName || !eventDateTime) {
+            return res.status(400).send('Please fill in all required event fields.');
         }
 
         if (priceNumber < 0) {
             return res.status(400).send('Ticket price cannot be negative.');
+        }
+
+        if (capacityNumber < 1) {
+            return res.status(400).send('Total capacity must be at least 1.');
         }
 
         await Event.create({
@@ -114,7 +113,7 @@ exports.createEvent = async (req, res, next) => {
             availableTickets: capacityNumber,
             venueName,
             eventDateTime,
-            artworkUrl,
+            artworkUrl: artworkUrl || '',
             status: req.session.user.role === 'Admin' ? 'Approved' : 'Pending',
             createdBy: req.session.user.id
         });
@@ -125,25 +124,36 @@ exports.createEvent = async (req, res, next) => {
     }
 };
 
-// Show edit event form
+// Show edit event form/modal
 exports.showEditEventForm = async (req, res, next) => {
     try {
-        const event = await Event.findById(req.params.id);
+        const eventToEdit = await Event.findById(req.params.id);
 
-        if (!event) {
+        if (!eventToEdit) {
             return res.status(404).send('Event not found');
         }
 
         if (
             req.session.user.role !== 'Admin' &&
-            event.createdBy.toString() !== req.session.user.id
+            eventToEdit.createdBy.toString() !== req.session.user.id
         ) {
             return res.status(403).send('Access denied.');
         }
 
+        let events;
+
+        if (req.session.user.role === 'Admin') {
+            events = await Event.find()
+                .populate('createdBy', 'fullName email role')
+                .sort({ createdAt: -1 });
+        } else {
+            events = await Event.find({ createdBy: req.session.user.id })
+                .sort({ createdAt: -1 });
+        }
+
         res.render('admin/manage', {
-            events: [],
-            eventToEdit: event,
+            events,
+            eventToEdit,
             user: req.session.user
         });
     } catch (error) {
@@ -151,7 +161,7 @@ exports.showEditEventForm = async (req, res, next) => {
     }
 };
 
-// Update event
+// Update an existing event
 exports.updateEvent = async (req, res, next) => {
     try {
         const event = await Event.findById(req.params.id);
@@ -180,6 +190,8 @@ exports.updateEvent = async (req, res, next) => {
         } = req.body;
 
         const newTotalCapacity = Number(totalCapacity);
+        const priceNumber = Number(ticketPrice);
+
         const ticketsAlreadySold = event.totalCapacity - event.availableTickets;
 
         if (newTotalCapacity < ticketsAlreadySold) {
@@ -188,15 +200,19 @@ exports.updateEvent = async (req, res, next) => {
             );
         }
 
+        if (priceNumber < 0) {
+            return res.status(400).send('Ticket price cannot be negative.');
+        }
+
         event.title = title;
         event.description = description;
         event.category = category;
-        event.ticketPrice = Number(ticketPrice);
+        event.ticketPrice = priceNumber;
         event.totalCapacity = newTotalCapacity;
         event.availableTickets = newTotalCapacity - ticketsAlreadySold;
         event.venueName = venueName;
         event.eventDateTime = eventDateTime;
-        event.artworkUrl = artworkUrl;
+        event.artworkUrl = artworkUrl || '';
 
         if (req.session.user.role === 'Admin' && status) {
             event.status = status;
@@ -210,7 +226,7 @@ exports.updateEvent = async (req, res, next) => {
     }
 };
 
-// Delete event
+// Delete an event
 exports.deleteEvent = async (req, res, next) => {
     try {
         const event = await Event.findById(req.params.id);
@@ -235,13 +251,13 @@ exports.deleteEvent = async (req, res, next) => {
     }
 };
 
-// Admin dashboard: stats for all events
+// Admin dashboard: platform-wide stats
 exports.getAdminDashboard = async (req, res, next) => {
     try {
         const totalEvents = await Event.countDocuments();
         const totalBookings = await Booking.countDocuments();
 
-        const bookings = await Booking.find().populate('event');
+        const bookings = await Booking.find();
 
         const totalRevenue = bookings.reduce((sum, booking) => {
             return sum + booking.totalPrice;
@@ -283,14 +299,17 @@ exports.getAdminDashboard = async (req, res, next) => {
 // Merchant dashboard: stats only for that merchant's events
 exports.getMerchantDashboard = async (req, res, next) => {
     try {
-        const merchantEvents = await Event.find({ createdBy: req.session.user.id });
+        const merchantEvents = await Event.find({
+            createdBy: req.session.user.id
+        });
+
         const merchantEventIds = merchantEvents.map(event => event._id);
 
         const totalEvents = merchantEvents.length;
 
         const bookings = await Booking.find({
             event: { $in: merchantEventIds }
-        }).populate('event');
+        });
 
         const totalBookings = bookings.length;
 
