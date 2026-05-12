@@ -55,13 +55,21 @@ project-root/
 ├── controllers/
 
 ├── middleware/
+
 ├── models/
+
 ├── routes/
+
 ├── views/
+
 ├── public/
+
 ├── .env
+
 ├── app.js
+
 ├── package.json
+
 └── README.md
 
 ---
