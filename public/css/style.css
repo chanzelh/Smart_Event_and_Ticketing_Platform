@@ -106,3 +106,60 @@ label.form-label {
     font-size: 0.9rem;
     font-weight: 500;
 }
+
+
+/* Ticket Styling */
+.ticket-container {
+    max-width: 650px;
+    background: var(--surface-gray);
+    border: 1px solid var(--secondary-gray);
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Creating the "punched-hole" ticket effect on the sides */
+.ticket-container::before, .ticket-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    background-color: var(--deep-charcoal);
+    border-radius: 50%;
+    transform: translateY(-50%);
+}
+.ticket-container::before { left: -15px; }
+.ticket-container::after { right: -15px; }
+
+.ticket-header {
+    border-bottom: 1px dashed var(--secondary-gray);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.qr-code-placeholder {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--secondary-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+/* Print Logic: Hides everything except the ticket when printing */
+@media print {
+    body * { visibility: hidden; }
+    #printableTicket, #printableTicket * { visibility: visible; }
+    #printableTicket {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+    }
+}
