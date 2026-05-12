@@ -1,4 +1,4 @@
-# Smart Event and TIcketing Platform 
+# Smart Event and Ticketing Platform 
 ## Project Overview
 This full-stack web application serves as a smart event management and ticketing platform, which is developed Advanced Events (Pty) Ltd. This platform enables users securely log in, look through all the available events, book their tickets and submit enquiries. Administrators are also able to create, update and delete events as well as view booking analytics while managing all customer enquiries.
 This entire system was developed using Node.js, Express.js, EJS and MongoDB and was constructed to follow the MVC (Model-View-Controller) architectural pattern.
