@@ -1,8 +1,14 @@
 <%- include('../partials/header') %>
 
-<% if (typeof success !== 'undefined' && success === 'true') { %>
-    <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; border: 1px solid #c3e6cb;">
-        Registration successful! Please log in with your new credentials.
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 5px; margin-bottom: 20px;">
+        <%= success === 'true' ? "Registration successful! Please log in." : success %>
+    </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 5px; margin-bottom: 20px;">
+        <%= error %>
     </div>
 <% } %>
 

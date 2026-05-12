@@ -2,24 +2,34 @@
 
 <section id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
-        <% events.slice(0, 3).forEach((event, index) => { %>
-            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                <div class="featured-event-bg" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('<%= event.image %>') center/cover no-repeat; height: 500px;">
-                    <div class="container h-100 d-flex align-items-center">
-                        <div class="hero-content">
-                            <span class="badge bg-gold text-dark mb-2 fw-bold">FEATURED: <%= event.category.toUpperCase() %></span>
-                            <h1 class="display-3 fw-bold text-white mb-3"><%= event.title %></h1>
-                            <p class="lead text-white-50 mb-4">
-                                <i class="bi bi-geo-alt gold-text"></i> <%= event.venue %>
-                                <span class="mx-2">|</span> 
-                                <i class="bi bi-calendar-event gold-text"></i> <%= event.date %>
-                            </p>
-                            <a href="/events/<%= event.id %>" class="btn btn-gold btn-lg">View Details <i class="bi bi-arrow-right"></i></a>
+        <% if (events && events.length > 0) { %>
+            <% events.slice(0, 3).forEach((event, index) => { %>
+                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                    <div class="featured-event-bg" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('<%= event.image %>') center/cover no-repeat; height: 500px;">
+                        <div class="container h-100 d-flex align-items-center">
+                            <div class="hero-content">
+                                <span class="badge bg-gold text-dark mb-2 fw-bold">FEATURED: <%= event.category ? event.category.toUpperCase() : 'EVENT' %></span>
+                                <h1 class="display-3 fw-bold text-white mb-3"><%= event.title %></h1>
+                                <p class="lead text-white-50 mb-4">
+                                    <i class="bi bi-geo-alt gold-text"></i> <%= event.venue %>
+                                    <span class="mx-2">|</span> 
+                                    <i class="bi bi-calendar-event gold-text"></i> <%= event.date %>
+                                </p>
+                                <a href="/events/<%= event._id %>" class="btn btn-gold btn-lg">View Details <i class="bi bi-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>
+            <% }) %>
+        <% } else { %>
+            <div class="carousel-item active">
+                <div class="featured-event-bg" style="background: #1a1a1a; height: 500px;">
+                    <div class="container h-100 d-flex align-items-center justify-content-center">
+                        <h2 class="text-white-50">No events found in the database.</h2>
+                    </div>
+                </div>
             </div>
-        <% }) %>
+        <% } %>
     </div>
     <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon"></span>
@@ -31,53 +41,75 @@
 
 <section class="filter-bar py-4 border-bottom border-secondary">
     <div class="container">
-        <form action="/events/search" method="GET" class="row g-2">
+        <form action="/" method="GET" class="row g-2">
             <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-text bg-surface border-secondary text-white-50"><i class="bi bi-search"></i></span>
-                    <input type="text" name="search" class="form-control bg-surface border-secondary text-white" placeholder="Search for events...">
+                    <input type="text" name="search" class="form-control bg-surface border-secondary text-white" placeholder="Search for events..." value="<%= searchQuery %>">
                 </div>
             </div>
             <div class="col-md-3">
                 <select name="category" class="form-select bg-surface border-secondary text-white">
-                    <option value="">All Categories</option>
-                    <option value="Concert">Music & Concerts</option>
-                    <option value="Conference">Corporate</option>
-                    <option value="Workshop">Workshops</option>
+                    <option value="All">All Categories</option>
+                    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                        <% categories.forEach(cat => { %>
+                            <option value="<%= cat %>" <%= selectedCategory === cat ? 'selected' : '' %>>
+                                <%= cat %>
+                            </option>
+                        <% }) %>
+                    <% } %>
                 </select>
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-gold w-100">Filter</button>
+            </div>
+            <div class="col-md-2">
+                <a href="/" class="btn btn-outline-secondary w-100">Reset</a>
             </div>
         </form>
     </div>
 </section>
 
 <main class="container py-5">
-    <h2 class="fw-bold mb-4">Upcoming Shows and Events</h2>
+    <h2 class="fw-bold mb-4">
+        <% if (searchQuery || selectedCategory !== 'All') { %>
+            Search Results
+        <% } else { %>
+            Upcoming Shows and Events
+        <% } %>
+    </h2>
+
     <div class="row row-cols-1 row-cols-md-3 g-4">
-        <% events.forEach(event => { %>
-            <div class="col">
-                <div class="card h-100 bg-surface border-secondary event-card">
-                    <img src="<%= event.image %>" class="card-img-top" alt="<%= event.title %>" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <small class="gold-text fw-bold text-uppercase"><%= event.category %></small>
-                            <small class="text-white-50">R<%= event.price %></small>
+        <% if (events && events.length > 0) { %>
+            <% events.forEach(event => { %>
+                <div class="col">
+                    <div class="card h-100 bg-surface border-secondary event-card">
+                        <img src="<%= event.image %>" class="card-img-top" alt="<%= event.title %>" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="gold-text fw-bold text-uppercase"><%= event.category %></small>
+                                <small class="text-white-50">R<%= event.price %></small>
+                            </div>
+                            <h5 class="card-title text-white"><%= event.title %></h5>
+                            <p class="card-text text-white-50 small"><%= event.venue %></p>
                         </div>
-                        <h5 class="card-title text-white"><%= event.title %></h5>
-                        <p class="card-text text-white-50 small"><%= event.venue %></p>
-                    </div>
-                    <div class="card-footer bg-transparent border-top border-secondary">
-                        <% if (event.capacity > 0) { %>
-                            <a href="/events/<%= event.id %>" class="btn btn-outline-light w-100">Get Tickets</a>
-                        <% } else { %>
-                            <button class="btn btn-secondary w-100" disabled>Sold Out</button>
-                        <% } %>
+                        <div class="card-footer bg-transparent border-top border-secondary">
+                            <% if (event.capacity > 0) { %>
+                                <a href="/events/<%= event._id || event.id %>" class="btn btn-outline-light w-100">Get Tickets</a>
+                            <% } else { %>
+                                <button class="btn btn-secondary w-100" disabled>Sold Out</button>
+                            <% } %>
+                        </div>
                     </div>
                 </div>
+            <% }) %>
+        <% } else { %>
+            <div class="col-12 text-center py-5">
+                <h3 class="text-white-50">Event not found</h3>
+                <p class="text-muted">We couldn't find anything matching your current filters.</p>
+                <a href="/" class="btn btn-gold">Clear All Filters</a>
             </div>
-        <% }) %>
+        <% } %>
     </div>
 </main>
 

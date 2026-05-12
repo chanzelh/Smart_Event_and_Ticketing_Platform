@@ -18,22 +18,68 @@
             </form>
         </div>
 
-        <% if (user.role === 'Admin') { %>
-        <div class="col-md-6">
-            <h2 class="gold-text">Recent Enquiries</h2>
-            <div class="card bg-surface border-secondary shadow">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item bg-transparent text-white border-secondary">
-                        <div class="d-flex justify-content-between">
-                            <strong class="gold-text">Ticket Issue</strong>
-                            <small class="text-white-50">2 mins ago</small>
-                        </div>
-                        <p class="small mb-0">I can't see my tickets in the dashboard...</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <% } %>
+        
+       <div class="col-md-6">
+    <h2 class="gold-text">Recent Enquiries</h2>
+    <div class="card bg-surface border-secondary shadow">
+        <ul class="list-group list-group-flush">
+            <!-- Enquiry 1: Existing Example -->
+            <li class="list-group-item bg-transparent text-white border-secondary">
+                <div class="d-flex justify-content-between">
+                    <strong class="gold-text">Ticket Issue</strong>
+                    <small class="text-white-50">2 mins ago</small>
+                </div>
+                <p class="small mb-0">I can't see my tickets in the dashboard...</p>
+            </li>
+
+            <!-- Enquiry 2: Payment/Refund -->
+            <li class="list-group-item bg-transparent text-white border-secondary">
+                <div class="d-flex justify-content-between">
+                    <strong class="gold-text">Refund Status</strong>
+                    <small class="text-white-50">15 mins ago</small>
+                </div>
+                <p class="small mb-0">The concert was postponed; when will the credit appear?</p>
+            </li>
+
+            <!-- Enquiry 3: Event Creation -->
+            <li class="list-group-item bg-transparent text-white border-secondary">
+                <div class="d-flex justify-content-between">
+                    <strong class="gold-text">Organizer Setup</strong>
+                    <small class="text-white-50">45 mins ago</small>
+                </div>
+                <p class="small mb-0">How do I enable early-bird pricing for my gala?</p>
+            </li>
+
+            <!-- Enquiry 4: QR/Access -->
+            <li class="list-group-item bg-transparent text-white border-secondary">
+                <div class="d-flex justify-content-between">
+                    <strong class="gold-text">Entry Access</strong>
+                    <small class="text-white-50">1 hour ago</small>
+                </div>
+                <p class="small mb-0">Does the QR code work without an internet connection?</p>
+            </li>
+
+            <!-- Enquiry 5: Customization -->
+            <li class="list-group-item bg-transparent text-white border-secondary">
+                <div class="d-flex justify-content-between">
+                    <strong class="gold-text">Branding Request</strong>
+                    <small class="text-white-50">3 hours ago</small>
+                </div>
+                <p class="small mb-0">Can I add my company logo to the physical PDF tickets?</p>
+            </li>
+
+            <!-- Enquiry 6: Security -->
+            <li class="list-group-item bg-transparent text-white border-secondary">
+                <div class="d-flex justify-content-between">
+                    <strong class="gold-text">Security Verification</strong>
+                    <small class="text-white-50">5 hours ago</small>
+                </div>
+                <p class="small mb-0">I received a login alert from an unknown device.</p>
+            </li>
+        </ul>
+    </div>
+</div>
+        
     </div>
 </main>
 

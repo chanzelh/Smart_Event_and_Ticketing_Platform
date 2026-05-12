@@ -1,5 +1,3 @@
-// controllers/eventController.js
-
 const Event = require('../models/Event');
 const Booking = require('../models/Booking');
 

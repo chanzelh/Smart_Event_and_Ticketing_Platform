@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-const authController = require('../controllers/authController');
-
 // Show login/register page
-router.get('/', (req, res) => {
+router.get('/login', (req, res) => {
     res.render('auth/auth', {
         user: req.session ? req.session.user : null
     });

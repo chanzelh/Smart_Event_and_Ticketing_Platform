@@ -1,23 +1,69 @@
 <%- include('partials/header') %>
 
-<main class="container py-5 text-center">
-    <div class="card bg-surface border-secondary p-5 shadow-lg mx-auto" style="max-width: 600px;">
-        <div class="mb-4">
-            <i class="bi bi-check-circle gold-text" style="font-size: 4rem;"></i>
-        </div>
-        <h2 class="fw-bold text-white mb-3">Order Confirmed!</h2>
-        <p class="text-white-50 mb-4">
-            A confirmation email with your digital tickets has been sent to your inbox. 
-            You can also download your tickets directly below.
-        </p>
-
-        <div class="d-grid gap-3">
-            <a href="/downloads/ticket-sample.pdf" class="btn btn-gold btn-lg">
-                <i class="bi bi-download"></i> Download PDF Tickets
-            </a>
-            <a href="/" class="btn btn-outline-light">Return to Home</a>
+<div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 70vh;">
+    
+    <!-- The Ticket Container -->
+    <div class="ticket-visual mb-4" style="max-width: 700px; width: 100%;">
+        <div class="card bg-surface border-secondary p-4 rounded-4 shadow-lg position-relative overflow-hidden">
+            <!-- Dotted line separator mimic -->
+            <div class="row align-items-center">
+                <div class="col-md-8 border-end border-secondary border-dashed">
+                    <h1 class="display-6 fw-bold text-white mb-4">Tckt.</h1>
+                    <h2 class="h3 text-white"><%= ticket.eventName %></h2>
+                    <p class="mb-1"><small class="text-white-50">Attendee:</small> <%= ticket.userName %></p>
+                    <p class="mb-0"><small class="text-white-50">Date:</small> <%= ticket.eventDate %></p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="bg-white p-2 d-inline-block rounded-3 mb-2">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<%= ticket.orderId %>" alt="QR Code" width="100">
+                    </div>
+                    <p class="small text-white-50 mb-0">SCAN TO VERIFY</p>
+                </div>
+            </div>
+            
+            <!-- Side punches (The "Ticket" look) -->
+            <div style="position:absolute; left:-15px; top:50%; width:30px; height:30px; background:#121212; border-radius:50%;"></div>
+            <div style="position:absolute; right:-15px; top:50%; width:30px; height:30px; background:#121212; border-radius:50%;"></div>
         </div>
     </div>
-</main>
+
+    <!-- Action Buttons -->
+    <div class="text-center">
+        <a href="/downloads/ticket" class="btn btn-purple px-4 me-3">Download PDF Ticket</a>
+        <a href="/" class="btn btn-outline-light px-4">Back to Home</a>
+    </div>
+</div>
+
+<style>
+    .ticket-visual {
+        background: #2A2A2A;
+        color: white;
+        display: flex;
+        padding: 40px;
+        border-radius: 20px;
+        border: 1px dashed #444;
+        max-width: 600px;
+        margin: 20px auto;
+    }
+    .left-section { flex: 2; }
+    .right-section { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .qr-placeholder img { background: white; padding: 5px; border-radius: 10px; }
+    .btn-download { background: #9c27b0; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    .btn-purple {
+        background-color: #8a2be2;
+        color: white;
+    }
+    .btn-purple:hover {
+        background-color: #7a1fd1;
+        color: white;
+    }
+    .text-cyan {
+        color: #00f2ff;
+    }
+</style>
 
 <%- include('partials/footer') %>

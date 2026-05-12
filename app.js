@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
-// 1. Ensure these are correctly imported (Done)
 const { isAuthenticated, authorizeRoles } = require('./middleware/authMiddleware');
 
 dotenv.config();
@@ -46,14 +45,14 @@ app.use((req, res, next) => {
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 
-// 2. Protected Admin Routes
+// Protected Admin Routes
 // This ensures only logged-in users with the 'admin' role can access /admin/...
 app.use('/admin', isAuthenticated, authorizeRoles('admin'), eventRoutes);
 
 // Global error handling middleware
+// --- app.js ---
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    // Custom error page or message
+    console.error("DEBUG ERROR:", err.stack); // ADD THIS LINE
     res.status(500).send('Something went wrong on the server!');
 });
 

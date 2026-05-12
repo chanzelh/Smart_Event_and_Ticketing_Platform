@@ -1,73 +1,37 @@
-// routes/eventRoutes.js
-
 const express = require('express');
 const router = express.Router();
-
 const eventController = require('../controllers/eventController');
-const bookingController = require('../controllers/bookingController');
 
-const {
-    isAuthenticated,
-    authorizeRoles
-} = require('../middleware/authMiddleware');
+// Note: Middleware (isAuthenticated, authorizeRoles) is already 
+// applied in app.js via: app.use('/admin', isAuthenticated, authorizeRoles('Admin'), eventRoutes);
+// So we don't need to repeat them on every single line here.
 
-// Admin/Merchant event management
-router.get(
-    '/manage',
-    isAuthenticated,
-    authorizeRoles('Admin', 'Merchant'),
-    eventController.showManageEvents
-);
+/**
+ * ALL ROUTES HERE ARE PREFIXED WITH /admin 
+ * (e.g., this first one is http://localhost:3000/admin/manage)
+ */
 
-router.post(
-    '/create',
-    isAuthenticated,
-    authorizeRoles('Admin', 'Merchant'),
-    eventController.createEvent
-);
+// 1. View all events in a management table
+router.get('/manage', eventController.showManageEvents);
 
-router.get(
-    '/edit/:id',
-    isAuthenticated,
-    authorizeRoles('Admin', 'Merchant'),
-    eventController.showEditEventForm
-);
+// 2. Form to create a new event
+router.get('/create', (req, res) => {
+    res.render('admin/create-event');
+});
 
-router.post(
-    '/edit/:id',
-    isAuthenticated,
-    authorizeRoles('Admin', 'Merchant'),
-    eventController.updateEvent
-);
+// 3. Logic to handle creating the event
+router.post('/create', eventController.createEvent);
 
-router.post(
-    '/delete/:id',
-    isAuthenticated,
-    authorizeRoles('Admin', 'Merchant'),
-    eventController.deleteEvent
-);
+// 4. Form to edit an existing event
+router.get('/edit/:id', eventController.showEditEventForm);
 
-// Dashboards
-router.get(
-    '/dashboard',
-    isAuthenticated,
-    authorizeRoles('Admin'),
-    eventController.getAdminDashboard
-);
+// 5. Logic to update the event
+router.post('/edit/:id', eventController.updateEvent);
 
-router.get(
-    '/merchant/dashboard',
-    isAuthenticated,
-    authorizeRoles('Merchant'),
-    eventController.getMerchantDashboard
-);
+// 6. Delete an event
+router.post('/delete/:id', eventController.deleteEvent);
 
-// Booking
-router.post(
-    '/events/:id/book',
-    isAuthenticated,
-    authorizeRoles('User'),
-    bookingController.bookTickets
-);
+// 7. Admin Dashboard / Stats
+router.get('/dashboard', eventController.getAdminDashboard);
 
 module.exports = router;

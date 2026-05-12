@@ -10,7 +10,7 @@ async function generateTicketPDF(dataCallback, endCallback, ticketData) {
     };
 
     // 1. Generate the QR Code Data URL first
-    // We can encode the Order ID or a unique URL
+    // We encode the Order ID or a unique URL
     const qrData = `https://tckt.system/verify/${ticketData.orderId || 'DEMO123'}`;
     const qrImageURL = await QRCode.toDataURL(qrData);
 

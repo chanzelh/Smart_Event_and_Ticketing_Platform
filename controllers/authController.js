@@ -4,76 +4,89 @@ const bcrypt = require('bcrypt');
 /*----- Registration Logic ----*/
 exports.register = async (req, res) => {
     try {
-        const { fullName, email, password, confirmPassword, role } = req.body;
-
-        if (!fullName || !email || !password || !confirmPassword || !role) {
-            return res.status(400).send('Please fill in all fields.');
-        }
-
-        if (password !== confirmPassword) {
-            return res.status(400).send('Passwords do not match.');
-        }
-
-        const existingUser = await User.findOne({ email });
-
-        if (existingUser) {
-            return res.status(400).send('A user with this email already exists.');
-        }
-
+        const { fullName, email, password, role } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({
+        
+        const newUser = new User({ 
             fullName,
             email,
-            password: hashedPassword,
-            role
+            username: email.toLowerCase(),
+            password: hashedPassword, 
+            role: role || 'user' 
         });
-
+        
         await newUser.save();
+        return res.redirect('/auth/login?success=true');
 
-        res.redirect('/auth');
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error registering user.');
+        // Check for MongoDB Duplicate Key Error (Code 11000)
+        if (err.code === 11000) {
+            // We RENDER the page and pass the error variable
+            return res.render('auth/auth', { 
+                error: "A user with this email already exists.", 
+                success: null 
+            });
+        }
+        
+        console.error("Registration Error:", err);
+        return res.status(500).render('auth/auth', { 
+            error: "An error occurred. Please try again.", 
+            success: null 
+        });
     }
 };
 
 /*----- Login Logic ----*/
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
+        
+        // Find user and normalize email to lowercase
+        const foundUser = await User.findOne({ username: username.toLowerCase() });
 
-        const user = await User.findOne({ email });
+        // Validate User & Password
+        if (foundUser && await bcrypt.compare(password, foundUser.password)) {
+            
+            // Set Session (Use 'foundUser' because 'user' was causing the ReferenceError)
+            req.session.user = { 
+                id: foundUser._id, 
+                role: foundUser.role, 
+                fullName: foundUser.fullName 
+            };
 
-        if (!user) {
-            return res.send('Invalid credentials.');
+            // Role-Based Redirects (MUST be inside this success block)
+            // Using toLowerCase() here makes our code safer against DB typos
+            const role = foundUser.role.toLowerCase();
+
+            if (role === 'admin') {
+                return res.redirect('/admin/dashboard');
+            }
+
+            if (role === 'merchant') {
+                return res.redirect('/admin/merchant/dashboard');
+            }
+
+            // Default redirect for normal users
+            return res.redirect('/'); 
+
+        } else {
+            // Handle Invalid Credentials
+            // Using 'return' ensures the code STOPS here
+            return res.render('auth/auth', { 
+                error: "Invalid email or password.", 
+                success: null 
+            });
         }
-
-        const passwordMatches = await bcrypt.compare(password, user.password);
-
-        if (!passwordMatches) {
-            return res.send('Invalid credentials.');
+    } catch (error) {
+        console.error("CRITICAL LOGIN ERROR:", error);
+        
+        // Safety check: Only send an error response if we haven't already
+        if (!res.headersSent) {
+            return res.status(500).render('auth/auth', { 
+                error: "A server error occurred. Please try again.", 
+                success: null 
+            });
         }
-
-        req.session.user = {
-            id: user._id,
-            fullName: user.fullName,
-            email: user.email,
-            role: user.role
-        };
-
-        if (user.role === 'Admin') {
-            return res.redirect('/admin/dashboard');
-        }
-
-        if (user.role === 'Merchant') {
-            return res.redirect('/admin/merchant/dashboard');
-        }
-
-        return res.redirect('/');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error logging in.');
     }
 };
 
