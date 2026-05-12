@@ -1,7 +1,12 @@
 {
+<<<<<<< HEAD
   "name": "project",
   "version": "1.0.0",
   "description": "",
+=======
+  "name": "wpr381-project",
+  "version": "1.0.0",
+>>>>>>> task-1-setup-auth
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+<<<<<<< HEAD
   "type": "commonjs",
   "dependencies": {
     "dotenv": "^17.4.2",
@@ -17,5 +23,11 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+=======
+  "description": "",
+  "dependencies": {
+    "ejs": "^5.0.2",
+    "express": "^5.2.1"
+>>>>>>> task-1-setup-auth
   }
 }
