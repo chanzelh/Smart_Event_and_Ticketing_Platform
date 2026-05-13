@@ -4,7 +4,6 @@ const isAuthenticated = (req, res, next) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/login');
     }
-
     next();
 };
 
@@ -14,17 +13,17 @@ const authorizeRoles = (...allowedRoles) => {
             return res.redirect('/auth/login');
         }
 
-        const userRole = req.session.user.role;
+        // Remove .toLowerCase() and .trim() logic
+        const userRole = req.session.user.role; 
 
+        // Check against the exact strings (e.g., "Admin", "Merchant")
         if (!allowedRoles.includes(userRole)) {
-            return res.status(403).send('Access denied: You do not have permission to view this page.');
+            console.warn(`Access Denied: User role "${userRole}" attempted to access: ${allowedRoles}`);
+            return res.status(403).send('Access denied: Unauthorized role.');
         }
 
         next();
     };
 };
 
-module.exports = {
-    isAuthenticated,
-    authorizeRoles
-};
+module.exports = { isAuthenticated, authorizeRoles };

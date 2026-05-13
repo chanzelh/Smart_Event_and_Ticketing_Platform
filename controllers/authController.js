@@ -50,17 +50,17 @@ exports.login = async (req, res) => {
 
             if (isMatch) {
                 req.session.user = { 
-                    id: foundUser._id, 
-                    role: foundUser.role, 
-                    fullName: foundUser.fullName 
-                };
+                id: foundUser._id, 
+                role: foundUser.role, // This will be "Admin" or "Merchant" from DB
+                fullName: foundUser.fullName 
+    };
 
-                const role = foundUser.role.toLowerCase();
-                if (role === 'admin') return res.redirect('/admin/dashboard');
-                if (role === 'merchant') return res.redirect('/admin/merchant/dashboard');
-                
-                return res.redirect('/'); 
-            }
+    // Use exact casing for redirects
+    if (foundUser.role === 'Admin') return res.redirect('/admin/dashboard');
+    if (foundUser.role === 'Merchant') return res.redirect('/admin/merchant/dashboard');
+    
+    return res.redirect('/'); 
+}
         }
 
         // If we reach here, either user wasn't found OR password didn't match
@@ -80,7 +80,11 @@ exports.login = async (req, res) => {
 
 /*----- Logout Logic ----*/
 exports.logout = (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/auth');
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Logout Error:", err);
+        }
+        // Change from '/auth' to '/auth/login'
+        res.redirect('/auth/login'); 
     });
 };

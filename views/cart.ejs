@@ -1,106 +1,134 @@
 <%- include('partials/header') %>
 
 <main class="container py-5">
-    <h2 class="gold-text mb-4">Your Shopping Cart</h2>
+    <h2 class="text-cyan mb-4">Your Shopping Cart</h2>
     
-<div class="row">
-    <% if (cartItem) { %>
-        <!-- Show the cart table if an item exists -->
-        <div class="col-lg-8">
-            <div class="card bg-surface border-secondary shadow mb-4">
-                <div class="table-responsive">
-                    <table class="table table-dark align-middle mb-0">
-                        <thead>
-                            <tr class="border-bottom border-secondary">
-                                <th>Event</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Subtotal</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="<%= cartItem.image %>" class="rounded me-3" alt="Event" width="80">
-                                        <div>
-                                            <h6 class="mb-0 text-white"><%= cartItem.title %></h6>
-                                            <small class="text-white-50"><%= cartItem.date %></small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>R<span id="unitPrice"><%= cartItem.price %></span></td>
-                                <td style="width: 150px;">
-                                    <div class="input-group input-group-sm">
-                                        <button class="btn btn-outline-secondary" type="button" onclick="updateQty(-1)">-</button>
-                                        <span id="quantityDisplay" class="form-control bg-dark text-white text-center border-secondary">1</span>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="updateQty(1)">+</button>
-                                    </div>
-                                </td>
-                                <td class="gold-text">R<span id="itemSubtotal"><%= cartItem.price %></span></td>
-                                <td>
-                                   
-                                    <a href="/cart/clear" class="btn btn-link text-danger p-0"><i class="bi bi-trash"></i></a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+    <form action="/cart/prepare-checkout" method="POST">
+        <div class="row">
+            <% if (cartItem) { %>
+                <div class="col-lg-8">
+                    <div class="card bg-surface border-secondary shadow mb-4">
+                        <div class="table-responsive">
+                            <table class="table table-dark align-middle mb-0">
+                                <thead>
+                                    <tr class="border-bottom border-secondary">
+                                        <th>Event</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="<%= cartItem.artworkUrl %>" class="rounded me-3" alt="Event" width="80">
+                                                <div>
+                                                    <h6 class="mb-0 text-white"><%= cartItem.title %></h6>
+                                                    <small class="text-white-50">
+                                                        <%= new Date(cartItem.eventDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) %>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>R<span id="unitPrice"><%= cartItem.ticketPrice %></span></td>
+                                        <td style="width: 150px;">
+                                            <div class="input-group input-group-sm">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="updateQty(-1)">-</button>
+                                                <span id="quantityDisplay" class="form-control bg-dark text-white text-center border-secondary">1</span>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="updateQty(1)">+</button>
+                                            </div>
+                                            
+                                            <input type="hidden" name="quantity" id="hiddenQuantity" value="1">
+                                        </td>
+                                        <td class="text-cyan fw-bold">R<span id="itemSubtotal"><%= cartItem.ticketPrice %></span></td>
+                                        <td>
+                                            <a href="/" class="btn btn-link text-danger p-0"><i class="bi bi-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-         <div class="col-lg-4">
-            <div class="card bg-surface border-secondary p-4 shadow">
-                <h4 class="gold-text mb-3">Order Summary</h4>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Tickets Subtotal</span>
-                    <span>R<span id="summarySubtotal"><%= cartItem.price %></span></span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Admin Fee</span>
-                    <span>R10</span>
-                </div>
-                <div class="d-flex justify-content-between mb-4 border-top border-secondary pt-2">
-                    <span class="fw-bold">Total</span>
-                    <span class="fw-bold fs-4 gold-text">R<span id="summaryTotal"><%= cartItem.price + 10 %></span></span>
-                </div>
-                
-                <a href="/checkout" class="btn btn-gold btn-lg w-100">Proceed to Checkout</a>
-            </div>
-       
-    <% } else { %>
-        <!-- Show an "Empty Cart" message if no item exists -->
-        <div class="col-12 text-center py-5">
-            <div class="card bg-surface border-secondary p-5">
-                <i class="bi bi-cart-x text-secondary mb-3" style="font-size: 3rem;"></i>
-                <h2 class="text-white">Your cart is empty</h2>
-                <p class="text-white-50">It looks like you haven't added any tickets yet.</p>
-                <div class="mt-4">
-                    <a href="/" class="btn btn-primary px-4">Browse Events</a>
-                </div>
-            </div>
-        </div>
-    <% } %>
-</div>
 
-       
+                <div class="col-lg-4">
+                    <div class="card bg-surface border-secondary p-4 shadow">
+                        <h4 class="text-cyan mb-3">Order Summary</h4>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tickets Subtotal</span>
+                            <span>R<span id="summarySubtotal"><%= cartItem.ticketPrice %></span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Admin Fee</span>
+                            <span>R10</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4 border-top border-secondary pt-2">
+                            <span class="fw-bold">Total</span>
+                            <span class="fw-bold fs-4 text-cyan">R<span id="summaryTotal"><%= cartItem.ticketPrice + 10 %></span></span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-purple-luxe btn-lg w-100">Proceed to Checkout</button>
+                    </div>
+                </div>
+           
+            <% } else { %>
+                <div class="col-12 text-center py-5">
+                    <div class="card bg-surface border-secondary p-5">
+                        <i class="bi bi-cart-x text-secondary mb-3" style="font-size: 3rem;"></i>
+                        <h2 class="text-white">Your cart is empty</h2>
+                        <p class="text-white-50">It looks like you haven't added any tickets yet.</p>
+                        <div class="mt-4">
+                            <a href="/" class="btn btn-outline-cyan px-4">Browse Events</a>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
         </div>
-    </div>
+    </form>
 </main>
 
+<style>
+    .text-cyan { color: #00f2ff !important; }
+    .bg-surface { background-color: #1a1a1a !important; }
+    .btn-purple-luxe {
+        background-color: #8a2be2;
+        color: white;
+        border: none;
+    }
+    .btn-purple-luxe:hover {
+        background-color: #7a1fd1;
+        color: white;
+    }
+    .btn-outline-cyan {
+        color: #00f2ff;
+        border: 1px solid #00f2ff;
+    }
+    .btn-outline-cyan:hover {
+        background-color: #00f2ff;
+        color: #121212;
+    }
+</style>
+
 <script>
-    // Logic to handle quantity and totals
     let quantity = 1;
-    const pricePerTicket = parseInt(document.getElementById('unitPrice').innerText);
+    // Extract base price as a clean number
+    const unitPriceElement = document.getElementById('unitPrice');
+    const pricePerTicket = unitPriceElement ? Number(unitPriceElement.innerText.replace(/[^0-9.-]+/g,"")) : 0;
     const adminFee = 10;
 
     function updateQty(change) {
         const newQty = quantity + change;
-        
-        // Prevent quantity from going below 1 or above 10 (capacity control simulation)
         if (newQty >= 1 && newQty <= 10) {
             quantity = newQty;
+            
+            // Update UI
             document.getElementById('quantityDisplay').innerText = quantity;
+            
+            // Update Hidden Input for Form Submission
+            document.getElementById('hiddenQuantity').value = quantity;
+            
             calculateTotals();
         }
     }
@@ -109,11 +137,14 @@
         const subtotal = quantity * pricePerTicket;
         const total = subtotal + adminFee;
 
-        // Update the UI
-        document.getElementById('itemSubtotal').innerText = subtotal;
-        document.getElementById('summarySubtotal').innerText = subtotal;
-        document.getElementById('summaryTotal').innerText = total;
+        // Update all display elements
+        if(document.getElementById('itemSubtotal')) document.getElementById('itemSubtotal').innerText = subtotal;
+        if(document.getElementById('summarySubtotal')) document.getElementById('summarySubtotal').innerText = subtotal;
+        if(document.getElementById('summaryTotal')) document.getElementById('summaryTotal').innerText = total;
     }
+
+    // Initial calculation on load
+    window.onload = calculateTotals;
 </script>
 
 <%- include('partials/footer') %>

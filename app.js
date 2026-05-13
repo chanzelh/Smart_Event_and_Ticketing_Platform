@@ -47,7 +47,7 @@ app.use('/auth', authRoutes);
 
 // Protected Admin Routes
 // This ensures only logged-in users with the 'admin' role can access /admin/...
-app.use('/admin', isAuthenticated, authorizeRoles('admin'), eventRoutes);
+app.use('/admin', isAuthenticated, authorizeRoles('Admin', 'Merchant'), eventRoutes);
 
 // Global error handling middleware
 // --- app.js ---

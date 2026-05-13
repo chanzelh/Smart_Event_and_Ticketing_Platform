@@ -33,5 +33,6 @@ router.post('/delete/:id', eventController.deleteEvent);
 
 // 7. Admin Dashboard / Stats
 router.get('/dashboard', eventController.getAdminDashboard);
+router.get('/merchant/dashboard', eventController.getMerchantDashboard);
 
 module.exports = router;

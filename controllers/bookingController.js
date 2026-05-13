@@ -4,44 +4,75 @@ const Booking = require('../models/Booking');
 // Book tickets for an event
 exports.bookTickets = async (req, res, next) => {
     try {
-        const eventId = req.params.id;
-        const quantity = Number(req.body.quantity);
-
-        if (!quantity || quantity < 1) {
-            return res.status(400).send('Please select at least 1 ticket.');
+        // 1. Verify the session cart exists
+        if (!req.session.cart) {
+            console.error("Booking Error: No cart found in session.");
+            return res.redirect('/');
         }
 
+        // 2. Extract eventId and the UPDATED quantity from the session
+        const { eventId, quantity } = req.session.cart;
+        
+        // Ensure quantity is treated as a number for mathematical operations
+        const qtyNumber = parseInt(quantity);
+
+        if (!qtyNumber || qtyNumber < 1) {
+            return res.status(400).send('Invalid ticket quantity. Please go back to the cart.');
+        }
+
+        // 3. Find the event in the database
         const event = await Event.findById(eventId);
 
         if (!event) {
             return res.status(404).send('Event not found.');
         }
 
+        // 4. Validate event status and ticket availability
         if (event.status !== 'Approved') {
-            return res.status(400).send('This event is not available for booking.');
+            return res.status(400).send('This event is no longer available for booking.');
         }
 
-        if (event.availableTickets < quantity) {
+        if (event.availableTickets < qtyNumber) {
             return res.status(400).send(
                 `Not enough tickets available. Only ${event.availableTickets} ticket(s) left.`
             );
         }
 
-        const totalPrice = event.ticketPrice * quantity;
+        // 5. Calculate final price based on the selected quantity
+        const totalPrice = event.ticketPrice * qtyNumber;
 
-        await Booking.create({
+        // 6. Create a permanent record in the Booking collection
+        const newBooking = await Booking.create({
             user: req.session.user.id,
             event: event._id,
-            quantity,
+            quantity: qtyNumber,
             totalPrice,
             bookingStatus: 'Confirmed'
         });
 
-        event.availableTickets -= quantity;
+        // 7. DECREMENT DATABASE: Subtract the ACTUAL quantity purchased 
+        event.availableTickets -= qtyNumber; 
         await event.save();
 
+        // 8. PREPARE SUCCESS DATA: Pass quantity to drive the Success page loop 
+        req.session.lastOrder = {
+            eventName: event.title,
+            userName: req.session.user.fullName,
+            // Format date for the digital ticket display
+            eventDate: new Date(event.eventDateTime).toLocaleDateString('en-GB', { 
+                weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' 
+            }),
+            orderId: `TK-${newBooking._id.toString().slice(-6).toUpperCase()}`,
+            quantity: qtyNumber, // Used by success.ejs for the ticket loop
+            totalPrice: totalPrice
+        };
+
+        // 9. Clean up and redirect
+        delete req.session.cart;
         res.redirect('/success');
+
     } catch (error) {
+        console.error("CRITICAL BOOKING ERROR:", error);
         next(error);
     }
 };
@@ -52,12 +83,13 @@ exports.getUserBookings = async (req, res, next) => {
         const bookings = await Booking.find({
             user: req.session.user.id
         })
-            .populate('event')
-            .sort({ createdAt: -1 });
+        .populate('event')
+        .sort({ createdAt: -1 });
 
+        // Render dashboard with specific user data
         res.render('dashboard', {
             user: req.session.user,
-            bookings
+            bookings: bookings
         });
     } catch (error) {
         next(error);
@@ -73,7 +105,11 @@ exports.cancelBooking = async (req, res, next) => {
             return res.status(404).send('Booking not found.');
         }
 
-        if (booking.user.toString() !== req.session.user.id && req.session.user.role !== 'Admin') {
+        // Authorization check
+        const isOwner = booking.user.toString() === req.session.user.id;
+        const isAdmin = req.session.user.role.toLowerCase() === 'admin';
+
+        if (!isOwner && !isAdmin) {
             return res.status(403).send('Access denied.');
         }
 
@@ -81,14 +117,16 @@ exports.cancelBooking = async (req, res, next) => {
             return res.status(400).send('This booking is already cancelled.');
         }
 
+        // Update booking status
         booking.bookingStatus = 'Cancelled';
         await booking.save();
 
+        // Return tickets to the event pool
         const event = await Event.findById(booking.event);
-
         if (event) {
             event.availableTickets += booking.quantity;
-
+            
+            // Ensure we don't exceed original capacity
             if (event.availableTickets > event.totalCapacity) {
                 event.availableTickets = event.totalCapacity;
             }

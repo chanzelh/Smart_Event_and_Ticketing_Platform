@@ -54,12 +54,15 @@ exports.getEventDetails = async (req, res, next) => {
 exports.showManageEvents = async (req, res, next) => {
     try {
         let events;
+        // FIX: Normalize role check to handle case-sensitivity
+        const userRole = req.session.user.role ? req.session.user.role.toLowerCase() : '';
 
-        if (req.session.user.role === 'Admin') {
+        if (userRole === 'admin') {
             events = await Event.find()
                 .populate('createdBy', 'fullName email role')
                 .sort({ createdAt: -1 });
         } else {
+            // Merchants only see their own events
             events = await Event.find({ createdBy: req.session.user.id })
                 .sort({ createdAt: -1 });
         }
@@ -102,6 +105,9 @@ exports.createEvent = async (req, res, next) => {
             return res.status(400).send('Total capacity must be at least 1.');
         }
 
+        // FIX: Normalize role check for status assignment
+        const userRole = req.session.user.role ? req.session.user.role : '';
+
         await Event.create({
             title,
             description,
@@ -112,7 +118,7 @@ exports.createEvent = async (req, res, next) => {
             venueName,
             eventDateTime,
             artworkUrl: artworkUrl || '',
-            status: req.session.user.role === 'Admin' ? 'Approved' : 'Pending',
+            status: userRole === 'Admin' ? 'Approved' : 'Pending',
             createdBy: req.session.user.id
         });
 
@@ -131,16 +137,17 @@ exports.showEditEventForm = async (req, res, next) => {
             return res.status(404).send('Event not found');
         }
 
+        const userRole = req.session.user.role ? req.session.user.role : '';
+
         if (
-            req.session.user.role !== 'Admin' &&
+            userRole !== 'Admin' &&
             eventToEdit.createdBy.toString() !== req.session.user.id
         ) {
             return res.status(403).send('Access denied.');
         }
 
         let events;
-
-        if (req.session.user.role === 'Admin') {
+        if (userRole === 'Admin') {
             events = await Event.find()
                 .populate('createdBy', 'fullName email role')
                 .sort({ createdAt: -1 });
@@ -168,8 +175,10 @@ exports.updateEvent = async (req, res, next) => {
             return res.status(404).send('Event not found');
         }
 
+        const userRole = req.session.user.role ? req.session.user.role : '';
+
         if (
-            req.session.user.role !== 'Admin' &&
+            userRole !== 'Admin' &&
             event.createdBy.toString() !== req.session.user.id
         ) {
             return res.status(403).send('Access denied.');
@@ -189,17 +198,12 @@ exports.updateEvent = async (req, res, next) => {
 
         const newTotalCapacity = Number(totalCapacity);
         const priceNumber = Number(ticketPrice);
-
         const ticketsAlreadySold = event.totalCapacity - event.availableTickets;
 
         if (newTotalCapacity < ticketsAlreadySold) {
             return res.status(400).send(
                 `Capacity cannot be lower than tickets already sold. Tickets already sold: ${ticketsAlreadySold}`
             );
-        }
-
-        if (priceNumber < 0) {
-            return res.status(400).send('Ticket price cannot be negative.');
         }
 
         event.title = title;
@@ -212,12 +216,11 @@ exports.updateEvent = async (req, res, next) => {
         event.eventDateTime = eventDateTime;
         event.artworkUrl = artworkUrl || '';
 
-        if (req.session.user.role === 'Admin' && status) {
+        if (userRole === 'Admin' && status) {
             event.status = status;
         }
 
         await event.save();
-
         res.redirect('/admin/manage');
     } catch (error) {
         next(error);
@@ -233,8 +236,10 @@ exports.deleteEvent = async (req, res, next) => {
             return res.status(404).send('Event not found');
         }
 
+        const userRole = req.session.user.role ? req.session.user.role : '';
+
         if (
-            req.session.user.role !== 'Admin' &&
+            userRole !== 'Admin' &&
             event.createdBy.toString() !== req.session.user.id
         ) {
             return res.status(403).send('Access denied.');
@@ -253,13 +258,14 @@ exports.deleteEvent = async (req, res, next) => {
 exports.getAdminDashboard = async (req, res, next) => {
     try {
         const totalEvents = await Event.countDocuments();
-        const totalBookings = await Booking.countDocuments();
+        // Fetch all bookings and populate user/event details
+        const bookings = await Booking.find()
+            .populate('user', 'fullName email')
+            .populate('event', 'title')
+            .sort({ createdAt: -1 });
 
-        const bookings = await Booking.find();
-
-        const totalRevenue = bookings.reduce((sum, booking) => {
-            return sum + booking.totalPrice;
-        }, 0);
+        const totalBookings = bookings.length;
+        const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
         const popularEvents = await Booking.aggregate([
             {
@@ -287,33 +293,26 @@ exports.getAdminDashboard = async (req, res, next) => {
             totalEvents,
             totalBookings,
             totalRevenue,
-            popularEvents
+            popularEvents,
+            bookings // Pass the detailed list
         });
-    } catch (error) {
-        next(error);
-    }
+    } catch (error) { next(error); }
 };
 
 // Merchant dashboard: stats only for that merchant's events
 exports.getMerchantDashboard = async (req, res, next) => {
     try {
-        const merchantEvents = await Event.find({
-            createdBy: req.session.user.id
-        });
+        const merchantEvents = await Event.find({ createdBy: req.session.user.id });
+        const merchantEventIds = merchantEvents.map(e => e._id);
 
-        const merchantEventIds = merchantEvents.map(event => event._id);
+        const bookings = await Booking.find({ event: { $in: merchantEventIds } })
+            .populate('user', 'fullName email')
+            .populate('event', 'title')
+            .sort({ createdAt: -1 });
 
         const totalEvents = merchantEvents.length;
-
-        const bookings = await Booking.find({
-            event: { $in: merchantEventIds }
-        });
-
         const totalBookings = bookings.length;
-
-        const totalRevenue = bookings.reduce((sum, booking) => {
-            return sum + booking.totalPrice;
-        }, 0);
+        const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
         const popularEvents = await Booking.aggregate([
             {
@@ -341,14 +340,13 @@ exports.getMerchantDashboard = async (req, res, next) => {
             { $unwind: '$event' }
         ]);
 
-        res.render('dashboard', {
+       res.render('dashboard', {
             user: req.session.user,
             totalEvents,
             totalBookings,
             totalRevenue,
-            popularEvents
+            popularEvents,
+            bookings // Pass the filtered detailed list
         });
-    } catch (error) {
-        next(error);
-    }
+    } catch (error) { next(error); }
 };

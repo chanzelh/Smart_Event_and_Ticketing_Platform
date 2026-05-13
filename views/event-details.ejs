@@ -3,7 +3,7 @@
 <main class="container py-5">
     <div class="row g-5">
         <div class="col-lg-7">
-            <img src="<%= event.image %>" class="img-fluid rounded shadow-lg border border-secondary" alt="<%= event.title %>">
+            <img src="<%= event.artworkUrl %>" class="img-fluid rounded shadow-lg border border-secondary" alt="<%= event.title %>">
         </div>
 
         <div class="col-lg-5">
@@ -11,26 +11,29 @@
             <h1 class="display-4 fw-bold text-white mb-3"><%= event.title %></h1>
             
             <div class="mb-4">
-                <p class="text-white-50"><i class="bi bi-calendar-event gold-text me-2"></i> <%= event.date %></p>
-                <p class="text-white-50"><i class="bi bi-geo-alt gold-text me-2"></i> <%= event.venue %></p>
-                <p class="text-white-50"><i class="bi bi-ticket-perforated gold-text me-2"></i> <%= event.capacity %> tickets remaining</p>
+                <p class="text-white-50">
+                    <i class="bi bi-calendar-event gold-text me-2"></i> 
+                    <%= new Date(event.eventDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                </p>
+                <p class="text-white-50"><i class="bi bi-geo-alt gold-text me-2"></i> <%= event.venueName %></p>
+                <p class="text-white-50"><i class="bi bi-ticket-perforated gold-text me-2"></i> <%= event.availableTickets %> tickets remaining</p>
             </div>
 
             <h3 class="h5 gold-text border-bottom border-secondary pb-2">About this Event</h3>
             <p class="text-white-50 mb-4"><%= event.description %></p>
 
             <div class="card bg-surface border-secondary p-4 shadow">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="fs-4">Price:</span>
-                    <span class="fs-3 fw-bold">R<%= event.price %></span>
-                </div>
-                
-                <% if (event.capacity > 0) { %>
-                    <form action="/bookings/book/<%= event.id %>" method="POST">
-                        <button type="submit" class="btn btn-gold btn-lg w-100">Book Tickets Now</button>
-                    </form>
-                <% } else { %>
-                    <button class="btn btn-secondary btn-lg w-100" disabled>Sold Out</button>
+                 <div class="d-flex justify-content-between align-items-center mb-3">
+                     <span class="fs-4 text-white">Price:</span>
+                     <span class="fs-3 fw-bold gold-text">R<%= event.ticketPrice %></span>
+                 </div>
+    
+                 <% if (event.availableTickets > 0) { %>
+                     <form action="/bookings/book/<%= event._id %>" method="POST">
+                         <button type="submit" class="btn btn-gold btn-lg w-100">Buy Tickets</button>
+                     </form>
+                 <% } else { %>
+                        <button class="btn btn-secondary btn-lg w-100" disabled>Sold Out</button>
                 <% } %>
             </div>
         </div>

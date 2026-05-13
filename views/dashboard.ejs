@@ -1,164 +1,144 @@
 <%- include('partials/header') %>
 
-<div class="container py-5">
-    <h1 class="gold-text mb-4">Dashboard</h1>
+<main class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="text-cyan fw-bold mb-0">Dashboard</h1>
+            <p class="text-white-50">Welcome back, <%= user.fullName %> (<%= user.role %>)</p>
+        </div>
+        <% if (user.role === 'Admin' || user.role === 'Merchant') { %>
+            <a href="/admin/manage" class="btn btn-purple-luxe px-4">
+                <i class="bi bi-plus-circle me-2"></i>Manage Events
+            </a>
+        <% } %>
+    </div>
 
-    <% if (typeof user !== 'undefined' && user) { %>
-        <p class="text-white-50">
-            Logged in as:
-            <strong><%= user.fullName || user.name || user.email %></strong>
-            (<%= user.role %>)
-        </p>
-    <% } %>
-
-    <hr class="border-secondary mb-4">
-
-    <% 
-        const safeTotalEvents = typeof totalEvents !== 'undefined' ? totalEvents : 0;
-        const safeTotalBookings = typeof totalBookings !== 'undefined' ? totalBookings : 0;
-        const safeTotalRevenue = typeof totalRevenue !== 'undefined' ? totalRevenue : 0;
-        const safePopularEvents = typeof popularEvents !== 'undefined' ? popularEvents : [];
-        const safeBookings = typeof bookings !== 'undefined' ? bookings : [];
-    %>
-
-    <% if (user && (user.role === 'Admin' || user.role === 'Merchant')) { %>
-
+    <% if (user.role === 'Admin' || user.role === 'Merchant') { %>
         <div class="row g-4 mb-5">
             <div class="col-md-4">
-                <div class="card bg-surface border-secondary p-4 text-center shadow">
-                    <h2 class="display-4 fw-bold text-white">
-                        <%= safeTotalEvents %>
-                    </h2>
-                    <p class="text-white-50 mb-0">Total Events</p>
+                <div class="card bg-surface border-secondary p-4 shadow-sm h-100">
+                    <small class="text-white-50 text-uppercase fw-bold">Total Events</small>
+                    <h2 class="display-5 text-white mb-0"><%= totalEvents %></h2>
+                    <div class="progress mt-3" style="height: 4px; background: #333;">
+                        <div class="progress-bar bg-cyan" style="width: 70%"></div>
+                    </div>
                 </div>
             </div>
-
             <div class="col-md-4">
-                <div class="card bg-surface border-secondary p-4 text-center shadow">
-                    <h2 class="display-4 fw-bold text-white">
-                        <%= safeTotalBookings %>
-                    </h2>
-                    <p class="text-white-50 mb-0">Total Bookings</p>
+                <div class="card bg-surface border-secondary p-4 shadow-sm h-100">
+                    <small class="text-white-50 text-uppercase fw-bold">Tickets Sold</small>
+                    <h2 class="display-5 text-white mb-0"><%= totalBookings %></h2>
+                    <div class="progress mt-3" style="height: 4px; background: #333;">
+                        <div class="progress-bar bg-purple-luxe" style="width: 50%"></div>
+                    </div>
                 </div>
             </div>
-
             <div class="col-md-4">
-                <div class="card bg-surface border-secondary p-4 text-center shadow">
-                    <h2 class="display-4 fw-bold text-white">
-                        R<%= safeTotalRevenue.toFixed ? safeTotalRevenue.toFixed(2) : safeTotalRevenue %>
-                    </h2>
-                    <p class="text-white-50 mb-0">Total Revenue</p>
+                <div class="card bg-surface border-secondary p-4 shadow-sm h-100">
+                    <small class="text-white-50 text-uppercase fw-bold">Total Revenue</small>
+                    <h2 class="display-5 text-cyan mb-0">R<%= totalRevenue.toLocaleString() %></h2>
+                    <div class="progress mt-3" style="height: 4px; background: #333;">
+                        <div class="progress-bar bg-cyan" style="width: 85%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="card bg-surface border-secondary p-4 shadow mb-5">
-            <h3 class="gold-text mb-3">
-                <% if (user.role === 'Admin') { %>
-                    Platform Analytics
-                <% } else { %>
-                    Merchant Analytics
-                <% } %>
-            </h3>
-
-            <% if (safePopularEvents.length === 0) { %>
-                <p class="text-white-50 mb-0">No booking data available yet.</p>
-            <% } else { %>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="h4 text-white mb-0">Recent Transactions</h3>
+                <span class="badge rounded-pill bg-dark border border-secondary text-white-50">Live Data</span>
+            </div>
+            
+            <% if (bookings && bookings.length > 0) { %>
                 <div class="table-responsive">
-                    <table class="table table-dark table-bordered table-hover align-middle">
+                    <table class="table table-dark table-hover align-middle mb-0">
                         <thead>
-                            <tr>
+                            <tr class="text-white-50 small text-uppercase">
+                                <th>Customer</th>
                                 <th>Event</th>
-                                <th>Tickets Sold</th>
-                                <th>Revenue</th>
+                                <th class="text-center">Qty</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% safePopularEvents.forEach(item => { %>
-                                <tr>
+                            <% bookings.forEach(booking => { %>
+                                <tr class="border-bottom border-secondary">
                                     <td>
-                                        <%= item.event && item.event.title ? item.event.title : 'Unknown Event' %>
+                                        <div class="fw-bold"><%= booking.user ? booking.user.fullName : 'Deleted User' %></div>
+                                        <small class="text-white-50"><%= booking.user ? booking.user.email : 'N/A' %></small>
                                     </td>
+                                    <td class="text-cyan"><%= booking.event ? booking.event.title : 'Deleted Event' %></td>
+                                    <td class="text-center"><%= booking.quantity %></td>
+                                    <td class="fw-bold">R<%= booking.totalPrice.toFixed(2) %></td>
                                     <td>
-                                        <%= item.totalTicketsSold || 0 %>
+                                        <span class="badge <%= booking.bookingStatus === 'Confirmed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' %> px-3">
+                                            <%= booking.bookingStatus %>
+                                        </span>
                                     </td>
-                                    <td>
-                                        R<%= item.totalRevenue ? item.totalRevenue.toFixed(2) : '0.00' %>
-                                    </td>
+                                    <td><small class="text-white-50"><%= new Date(booking.createdAt).toLocaleDateString() %></small></td>
                                 </tr>
                             <% }) %>
                         </tbody>
                     </table>
                 </div>
-            <% } %>
-        </div>
-
-        <div class="mb-4">
-            <% if (user.role === 'Admin' || user.role === 'Merchant') { %>
-                <a href="/admin/manage" class="btn btn-gold">
-                    Manage Events
-                </a>
+            <% } else { %>
+                <div class="text-center py-5">
+                    <i class="bi bi-receipt text-secondary display-4"></i>
+                    <p class="text-white-50 mt-3">No bookings recorded yet.</p>
+                </div>
             <% } %>
         </div>
 
     <% } else { %>
-
-        <div class="card bg-surface border-secondary p-4 shadow">
-            <h3 class="gold-text mb-3">My Bookings</h3>
-
-            <% if (safeBookings.length === 0) { %>
-                <p class="text-white-50 mb-0">You do not have any bookings yet.</p>
-            <% } else { %>
-                <div class="table-responsive">
-                    <table class="table table-dark table-bordered table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Event</th>
-                                <th>Quantity</th>
-                                <th>Total Price</th>
-                                <th>Status</th>
-                                <th>Booked On</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% safeBookings.forEach(booking => { %>
-                                <tr>
-                                    <td>
-                                        <%= booking.event && booking.event.title ? booking.event.title : 'Unknown Event' %>
-                                    </td>
-                                    <td>
-                                        <%= booking.quantity %>
-                                    </td>
-                                    <td>
-                                        R<%= booking.totalPrice ? booking.totalPrice.toFixed(2) : '0.00' %>
-                                    </td>
-                                    <td>
-                                        <%= booking.bookingStatus %>
-                                    </td>
-                                    <td>
-                                        <%= booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A' %>
-                                    </td>
-                                    <td>
-                                        <% if (booking.bookingStatus !== 'Cancelled') { %>
-                                            <form action="/admin/bookings/<%= booking._id %>/cancel" method="POST">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    Cancel
-                                                </button>
-                                            </form>
-                                        <% } else { %>
-                                            <span class="text-white-50">Cancelled</span>
-                                        <% } %>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } %>
-        </div>
-
+        <div class="card bg-surface border-secondary p-4">
+            <h3 class="text-white mb-4">Your Past Bookings</h3>
+            <p class="text-white-50">Visit the "Events" page to buy more tickets.</p>
+            </div>
     <% } %>
-</div>
+</main>
+
+<style>
+    /* Theme Variables */
+    .text-cyan { color: #00f2ff !important; }
+    .bg-cyan { background-color: #00f2ff !important; }
+    .bg-surface { background-color: #1a1a1a !important; }
+    
+    .btn-purple-luxe {
+        background-color: #8a2be2;
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-purple-luxe:hover {
+        background-color: #7a1fd1;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        color: white;
+    }
+
+    .bg-purple-luxe { background-color: #8a2be2 !important; }
+
+    /* Table Styling */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 242, 255, 0.05) !important;
+        transition: background-color 0.2s ease;
+    }
+    
+    .table thead th {
+        border-top: none;
+        border-bottom: 2px solid #333;
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.2); }
+    .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.2); }
+</style>
 
 <%- include('partials/footer') %>

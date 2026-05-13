@@ -5,15 +5,15 @@
         <% if (events && events.length > 0) { %>
             <% events.slice(0, 3).forEach((event, index) => { %>
                 <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                    <div class="featured-event-bg" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('<%= event.image %>') center/cover no-repeat; height: 500px;">
+                    <div class="featured-event-bg" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('<%= event.artworkUrl %>') center/cover no-repeat; height: 500px;">
                         <div class="container h-100 d-flex align-items-center">
                             <div class="hero-content">
                                 <span class="badge bg-gold text-dark mb-2 fw-bold">FEATURED: <%= event.category ? event.category.toUpperCase() : 'EVENT' %></span>
                                 <h1 class="display-3 fw-bold text-white mb-3"><%= event.title %></h1>
                                 <p class="lead text-white-50 mb-4">
-                                    <i class="bi bi-geo-alt gold-text"></i> <%= event.venue %>
+                                    <i class="bi bi-geo-alt gold-text"></i> <%= event.venueName %>
                                     <span class="mx-2">|</span> 
-                                    <i class="bi bi-calendar-event gold-text"></i> <%= event.date %>
+                                    <i class="bi bi-calendar-event gold-text"></i> <%= new Date(event.eventDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>
                                 </p>
                                 <a href="/events/<%= event._id %>" class="btn btn-gold btn-lg">View Details <i class="bi bi-arrow-right"></i></a>
                             </div>
@@ -71,7 +71,7 @@
 </section>
 
 <main class="container py-5">
-    <h2 class="fw-bold mb-4">
+    <h2 class="fw-bold mb-4 text-white">
         <% if (searchQuery || selectedCategory !== 'All') { %>
             Search Results
         <% } else { %>
@@ -84,18 +84,21 @@
             <% events.forEach(event => { %>
                 <div class="col">
                     <div class="card h-100 bg-surface border-secondary event-card">
-                        <img src="<%= event.image %>" class="card-img-top" alt="<%= event.title %>" style="height: 200px; object-fit: cover;">
+                        <img src="<%= event.artworkUrl %>" class="card-img-top" alt="<%= event.title %>" style="height: 200px; object-fit: cover;">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <small class="gold-text fw-bold text-uppercase"><%= event.category %></small>
-                                <small class="text-white-50">R<%= event.price %></small>
+                                <small class="text-white-50">R<%= event.ticketPrice %></small>
                             </div>
                             <h5 class="card-title text-white"><%= event.title %></h5>
-                            <p class="card-text text-white-50 small"><%= event.venue %></p>
+                            <p class="card-text text-white-50 small"><%= event.venueName %></p>
+                            <p class="card-text text-white-50 small">
+                                <i class="bi bi-calendar3 me-1"></i> <%= new Date(event.eventDateTime).toDateString() %>
+                            </p>
                         </div>
                         <div class="card-footer bg-transparent border-top border-secondary">
-                            <% if (event.capacity > 0) { %>
-                                <a href="/events/<%= event._id || event.id %>" class="btn btn-outline-light w-100">Get Tickets</a>
+                            <% if (event.availableTickets > 0) { %>
+                                <a href="/events/<%= event._id %>" class="btn btn-outline-light w-100">Get Tickets</a>
                             <% } else { %>
                                 <button class="btn btn-secondary w-100" disabled>Sold Out</button>
                             <% } %>
