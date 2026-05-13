@@ -27,7 +27,18 @@
                     <li class="nav-item"><a class="nav-link text-white-50" href="/contact">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center">
-    <a href="/dashboard" class="btn btn-outline-light me-3">Dashboard</a>
+                    <% if (user) { %>
+    
+        <% if (user.role === 'Admin') { %>
+            <a class="btn btn-outline-light me-3" href="/admin/dashboard">Dashboard</a>
+        <% } else if (user.role === 'Merchant') { %>
+            <a class="btn btn-outline-light me-3" href="/merchant/dashboard">Dashboard</a>
+        <% } else { %>
+            <a class="btn btn-outline-light me-3" href="/dashboard">Dashboard</a>
+        <% } %>
+    
+<% } %>
+   
 
     <div class="auth-nav">
     <% if (user) { %>

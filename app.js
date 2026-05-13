@@ -50,7 +50,6 @@ app.use('/auth', authRoutes);
 app.use('/admin', isAuthenticated, authorizeRoles('Admin', 'Merchant'), eventRoutes);
 
 // Global error handling middleware
-// --- app.js ---
 app.use((err, req, res, next) => {
     console.error("DEBUG ERROR:", err.stack); // ADD THIS LINE
     res.status(500).send('Something went wrong on the server!');

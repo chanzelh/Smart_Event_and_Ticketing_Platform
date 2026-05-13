@@ -2,10 +2,6 @@ const express = require('express');
 const router = express.Router();
 const eventController = require('../controllers/eventController');
 
-// Note: Middleware (isAuthenticated, authorizeRoles) is already 
-// applied in app.js via: app.use('/admin', isAuthenticated, authorizeRoles('Admin'), eventRoutes);
-// So we don't need to repeat them on every single line here.
-
 /**
  * ALL ROUTES HERE ARE PREFIXED WITH /admin 
  * (e.g., this first one is http://localhost:3000/admin/manage)

@@ -105,7 +105,6 @@ exports.createEvent = async (req, res, next) => {
             return res.status(400).send('Total capacity must be at least 1.');
         }
 
-        // FIX: Normalize role check for status assignment
         const userRole = req.session.user.role ? req.session.user.role : '';
 
         await Event.create({
@@ -257,46 +256,33 @@ exports.deleteEvent = async (req, res, next) => {
 // Admin dashboard: platform-wide stats
 exports.getAdminDashboard = async (req, res, next) => {
     try {
-        const totalEvents = await Event.countDocuments();
-        // Fetch all bookings and populate user/event details
+        const totalEvents = await Event.countDocuments({});
+
         const bookings = await Booking.find()
             .populate('user', 'fullName email')
             .populate('event', 'title')
             .sort({ createdAt: -1 });
 
-        const totalBookings = bookings.length;
-        const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+        const totalTicketsSold = bookings.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0);
 
-        const popularEvents = await Booking.aggregate([
-            {
-                $group: {
-                    _id: '$event',
-                    totalTicketsSold: { $sum: '$quantity' },
-                    totalRevenue: { $sum: '$totalPrice' }
-                }
-            },
-            { $sort: { totalTicketsSold: -1 } },
-            { $limit: 5 },
-            {
-                $lookup: {
-                    from: 'events',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'event'
-                }
-            },
-            { $unwind: '$event' }
-        ]);
+        const totalRevenue = bookings.reduce((sum, b) => {
+            return sum + (Number(b.totalPrice) || 0);
+        }, 0);
+
+        const popularEvents = []; 
 
         res.render('dashboard', {
             user: req.session.user,
-            totalEvents,
-            totalBookings,
-            totalRevenue,
+            totalEvents: totalEvents || 0,
+            totalBookings: totalTicketsSold,
+            totalRevenue: totalRevenue || 0,
             popularEvents,
-            bookings // Pass the detailed list
+            bookings: bookings || [] // Fallback to empty array
         });
-    } catch (error) { next(error); }
+    } catch (error) {
+        console.error("ADMIN DASHBOARD CRASH:", error);
+        next(error);
+    }
 };
 
 // Merchant dashboard: stats only for that merchant's events
@@ -311,7 +297,7 @@ exports.getMerchantDashboard = async (req, res, next) => {
             .sort({ createdAt: -1 });
 
         const totalEvents = merchantEvents.length;
-        const totalBookings = bookings.length;
+        const totalTicketsSold = bookings.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0);
         const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
         const popularEvents = await Booking.aggregate([
@@ -343,7 +329,7 @@ exports.getMerchantDashboard = async (req, res, next) => {
        res.render('dashboard', {
             user: req.session.user,
             totalEvents,
-            totalBookings,
+            totalBookings: totalTicketsSold,
             totalRevenue,
             popularEvents,
             bookings // Pass the filtered detailed list

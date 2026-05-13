@@ -13,7 +13,6 @@ exports.bookTickets = async (req, res, next) => {
         // 2. Extract eventId and the UPDATED quantity from the session
         const { eventId, quantity } = req.session.cart;
         
-        // Ensure quantity is treated as a number for mathematical operations
         const qtyNumber = parseInt(quantity);
 
         if (!qtyNumber || qtyNumber < 1) {
@@ -58,12 +57,11 @@ exports.bookTickets = async (req, res, next) => {
         req.session.lastOrder = {
             eventName: event.title,
             userName: req.session.user.fullName,
-            // Format date for the digital ticket display
             eventDate: new Date(event.eventDateTime).toLocaleDateString('en-GB', { 
                 weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' 
             }),
             orderId: `TK-${newBooking._id.toString().slice(-6).toUpperCase()}`,
-            quantity: qtyNumber, // Used by success.ejs for the ticket loop
+            quantity: qtyNumber,
             totalPrice: totalPrice
         };
 
@@ -80,16 +78,17 @@ exports.bookTickets = async (req, res, next) => {
 // Show current user's booking history
 exports.getUserBookings = async (req, res, next) => {
     try {
-        const bookings = await Booking.find({
-            user: req.session.user.id
-        })
-        .populate('event')
-        .sort({ createdAt: -1 });
+        const bookings = await Booking.find({ user: req.session.user.id })
+            .populate('event')
+            .sort({ createdAt: -1 });
 
-        // Render dashboard with specific user data
         res.render('dashboard', {
             user: req.session.user,
-            bookings: bookings
+            bookings: bookings || [],
+            totalEvents: 0,
+            totalBookings: bookings.length || 0,
+            totalRevenue: 0,
+            popularEvents: []
         });
     } catch (error) {
         next(error);

@@ -42,7 +42,7 @@ exports.login = async (req, res) => {
         const { username, password } = req.body;
         const identifier = (username || "").toLowerCase().trim();
 
-        // CHANGE: Query 'email' instead of 'username'
+        
         const foundUser = await User.findOne({ email: identifier });
 
         if (foundUser) {
@@ -62,8 +62,6 @@ exports.login = async (req, res) => {
     return res.redirect('/'); 
 }
         }
-
-        // If we reach here, either user wasn't found OR password didn't match
         return res.render('auth/auth', { 
             error: "Invalid email or password.", 
             success: null 
@@ -84,7 +82,6 @@ exports.logout = (req, res) => {
         if (err) {
             console.error("Logout Error:", err);
         }
-        // Change from '/auth' to '/auth/login'
         res.redirect('/auth/login'); 
     });
 };

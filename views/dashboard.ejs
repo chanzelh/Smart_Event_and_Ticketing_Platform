@@ -7,18 +7,23 @@
             <p class="text-white-50">Welcome back, <%= user.fullName %> (<%= user.role %>)</p>
         </div>
         <% if (user.role === 'Admin' || user.role === 'Merchant') { %>
-            <a href="/admin/manage" class="btn btn-purple-luxe px-4">
-                <i class="bi bi-plus-circle me-2"></i>Manage Events
-            </a>
+            <div class="d-flex gap-2">
+                <a href="/admin/manage" class="btn btn-purple-luxe px-4">
+                    <i class="bi bi-plus-circle me-2"></i>Manage Events
+                </a>
+            </div>
         <% } %>
     </div>
 
     <% if (user.role === 'Admin' || user.role === 'Merchant') { %>
+        
         <div class="row g-4 mb-5">
             <div class="col-md-4">
                 <div class="card bg-surface border-secondary p-4 shadow-sm h-100">
                     <small class="text-white-50 text-uppercase fw-bold">Total Events</small>
-                    <h2 class="display-5 text-white mb-0"><%= totalEvents %></h2>
+                    <h2 class="display-5 text-white mb-0">
+                        <%= typeof totalEvents !== 'undefined' ? totalEvents : 0 %>
+                    </h2>
                     <div class="progress mt-3" style="height: 4px; background: #333;">
                         <div class="progress-bar bg-cyan" style="width: 70%"></div>
                     </div>
@@ -27,7 +32,9 @@
             <div class="col-md-4">
                 <div class="card bg-surface border-secondary p-4 shadow-sm h-100">
                     <small class="text-white-50 text-uppercase fw-bold">Tickets Sold</small>
-                    <h2 class="display-5 text-white mb-0"><%= totalBookings %></h2>
+                    <h2 class="display-5 text-white mb-0">
+                        <%= typeof totalBookings !== 'undefined' ? totalBookings : 0 %>
+                    </h2>
                     <div class="progress mt-3" style="height: 4px; background: #333;">
                         <div class="progress-bar bg-purple-luxe" style="width: 50%"></div>
                     </div>
@@ -36,7 +43,9 @@
             <div class="col-md-4">
                 <div class="card bg-surface border-secondary p-4 shadow-sm h-100">
                     <small class="text-white-50 text-uppercase fw-bold">Total Revenue</small>
-                    <h2 class="display-5 text-cyan mb-0">R<%= totalRevenue.toLocaleString() %></h2>
+                    <h2 class="display-5 text-cyan mb-0">
+                        R<%= (typeof totalRevenue !== 'undefined' ? totalRevenue : 0).toLocaleString() %>
+                    </h2>
                     <div class="progress mt-3" style="height: 4px; background: #333;">
                         <div class="progress-bar bg-cyan" style="width: 85%"></div>
                     </div>
@@ -47,7 +56,7 @@
         <div class="card bg-surface border-secondary p-4 shadow mb-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="h4 text-white mb-0">Recent Transactions</h3>
-                <span class="badge rounded-pill bg-dark border border-secondary text-white-50">Live Data</span>
+                <span class="badge rounded-pill bg-dark border border-secondary text-white-50">Live Analytics</span>
             </div>
             
             <% if (bookings && bookings.length > 0) { %>
@@ -67,14 +76,14 @@
                             <% bookings.forEach(booking => { %>
                                 <tr class="border-bottom border-secondary">
                                     <td>
-                                        <div class="fw-bold"><%= booking.user ? booking.user.fullName : 'Deleted User' %></div>
-                                        <small class="text-white-50"><%= booking.user ? booking.user.email : 'N/A' %></small>
+                                        <div class="fw-bold"><%= booking.user?.fullName || 'Guest' %></div>
+                                        <small class="text-white-50"><%= booking.user?.email || 'N/A' %></small>
                                     </td>
-                                    <td class="text-cyan"><%= booking.event ? booking.event.title : 'Deleted Event' %></td>
+                                    <td class="text-cyan"><%= booking.event?.title || 'Unknown Event' %></td>
                                     <td class="text-center"><%= booking.quantity %></td>
-                                    <td class="fw-bold">R<%= booking.totalPrice.toFixed(2) %></td>
+                                    <td class="fw-bold">R<%= (booking.totalPrice || 0).toFixed(2) %></td>
                                     <td>
-                                        <span class="badge <%= booking.bookingStatus === 'Confirmed' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' %> px-3">
+                                        <span class="badge bg-success-subtle text-success px-3">
                                             <%= booking.bookingStatus %>
                                         </span>
                                     </td>
@@ -93,18 +102,65 @@
         </div>
 
     <% } else { %>
-        <div class="card bg-surface border-secondary p-4">
-            <h3 class="text-white mb-4">Your Past Bookings</h3>
-            <p class="text-white-50">Visit the "Events" page to buy more tickets.</p>
+        <div class="card bg-surface border-secondary p-4 shadow">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="text-white mb-0">Your Past Bookings</h3>
+                <a href="/" class="btn btn-outline-cyan btn-sm">Browse More Events</a>
             </div>
+
+            <% if (bookings && bookings.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead>
+                            <tr class="text-white-50 small text-uppercase">
+                                <th>Event</th>
+                                <th>Date</th>
+                                <th class="text-center">Qty</th>
+                                <th>Total Paid</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% bookings.forEach(booking => { %>
+                                <tr class="border-bottom border-secondary">
+                                    <td>
+                                        <div class="fw-bold text-cyan"><%= booking.event?.title || 'Event Removed' %></div>
+                                        <small class="text-white-50"><%= booking.event?.venueName || 'N/A' %></small>
+                                    </td>
+                                    <td>
+                                        <small><%= booking.event?.eventDateTime ? new Date(booking.event.eventDateTime).toDateString() : 'N/A' %></small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-dark border border-secondary"><%= booking.quantity %></span>
+                                    </td>
+                                    <td class="fw-bold">R<%= (booking.totalPrice || 0).toFixed(2) %></td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success px-3">
+                                            <%= booking.bookingStatus %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-5">
+                    <i class="bi bi-ticket-perforated text-secondary display-4"></i>
+                    <p class="text-white-50 mt-3">You haven't booked any events yet.</p>
+                    <a href="/" class="btn btn-purple-luxe mt-2 px-4">Find Your First Event</a>
+                </div>
+            <% } %>
+        </div>
     <% } %>
 </main>
 
 <style>
-    /* Theme Variables */
+    /* Theme Accents */
     .text-cyan { color: #00f2ff !important; }
     .bg-cyan { background-color: #00f2ff !important; }
     .bg-surface { background-color: #1a1a1a !important; }
+    .bg-purple-luxe { background-color: #8a2be2 !important; }
     
     .btn-purple-luxe {
         background-color: #8a2be2;
@@ -119,26 +175,28 @@
         color: white;
     }
 
-    .bg-purple-luxe { background-color: #8a2be2 !important; }
+    .btn-outline-cyan {
+        color: #00f2ff;
+        border: 1px solid #00f2ff;
+    }
+    .btn-outline-cyan:hover {
+        background-color: #00f2ff;
+        color: #121212;
+    }
 
-    /* Table Styling */
+    /* Table & Status UI */
     .table-hover tbody tr:hover {
         background-color: rgba(0, 242, 255, 0.05) !important;
-        transition: background-color 0.2s ease;
     }
     
-    .table thead th {
-        border-top: none;
-        border-bottom: 2px solid #333;
-    }
-
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.15) !important; }
+    
     .badge {
         font-weight: 500;
         letter-spacing: 0.5px;
     }
 
-    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.2); }
-    .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.2); }
+    .progress-bar { transition: width 1s ease-in-out; }
 </style>
 
 <%- include('partials/footer') %>

@@ -8,7 +8,7 @@ const eventController = require('../controllers/eventController');
 
 /**
  * 1. Home Page
- * Fetches only 'Approved' events from the database[cite: 1, 3].
+ * Fetches only 'Approved' events from the database.
  */
 router.get('/', async (req, res) => {
     try {
@@ -43,13 +43,13 @@ router.get('/', async (req, res) => {
 
 /**
  * 2. Event Details
- * Uses the controller to fetch real DB data[cite: 3].
+ * Uses the controller to fetch real DB data.
  */
 router.get('/events/:id', eventController.getEventDetails);
 
 /**
  * 3. Shopping Cart
- * Manages the temporary session-based selection[cite: 1].
+ * Manages the temporary session-based selection.
  */
 router.get('/cart', async (req, res) => {
     try {
@@ -74,7 +74,7 @@ router.get('/cart', async (req, res) => {
 
 /**
  * 4. Add to Cart Logic
- * Stores the event selection in the session[cite: 1].
+ * Stores the event selection in the session.
  */
 
 
@@ -92,17 +92,13 @@ router.post('/bookings/book/:id', (req, res) => {
 
 /**
  * 5. Checkout & Order Completion
- * This now interfaces with the bookingController to ensure tickets 
- * are decremented and records are saved.
  */
-// routes/indexRoutes.js
 
 router.post('/cart/prepare-checkout', (req, res) => {
     console.log("--- DEBUG: PREPARE CHECKOUT HIT ---");
     console.log("Incoming Body:", req.body);
 
     if (req.session.cart) {
-        // Capture quantity from the form
         const selectedQty = parseInt(req.body.quantity) || 1;
         req.session.cart.quantity = selectedQty;
         
@@ -121,7 +117,7 @@ router.post('/checkout/complete', isAuthenticated, bookingController.bookTickets
 
 /**
  * 6. Success Page
- * Displays after bookingController.bookTickets redirects here[cite: 2].
+ * Displays after bookingController.bookTickets redirects here.
  */
 router.get('/success', (req, res) => {
     if (!req.session.lastOrder) {
@@ -135,7 +131,20 @@ router.get('/success', (req, res) => {
 /**
  * 7. Dashboard & Contact
  */
-router.get('/dashboard', isAuthenticated, bookingController.getUserBookings);
+router.get('/merchant/dashboard', isAuthenticated, eventController.getMerchantDashboard);
+router.get('/admin/dashboard', isAuthenticated, eventController.getAdminDashboard);
+router.get('/dashboard', isAuthenticated, (req, res) => {
+    const role = req.session.user.role;
+
+    if (role === 'Admin') {
+        return res.redirect('/admin/dashboard');
+    } 
+    if (role === 'Merchant') {
+        return res.redirect('/merchant/dashboard');
+    }
+    
+    return bookingController.getUserBookings(req, res);
+});
 
 router.get('/contact', (req, res) => {
     res.render('contact'); 
@@ -143,7 +152,7 @@ router.get('/contact', (req, res) => {
 
 /**
  * 8. PDF Ticket Generation
- * Generates PDF using data stored in session after a successful booking[cite: 1].
+ * Generates PDF using data stored in session after a successful booking.
  */
 router.get('/downloads/ticket', async (req, res) => {
     try {

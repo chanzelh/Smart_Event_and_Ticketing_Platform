@@ -123,10 +123,8 @@
         if (newQty >= 1 && newQty <= 10) {
             quantity = newQty;
             
-            // Update UI
             document.getElementById('quantityDisplay').innerText = quantity;
             
-            // Update Hidden Input for Form Submission
             document.getElementById('hiddenQuantity').value = quantity;
             
             calculateTotals();
