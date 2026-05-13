@@ -95,7 +95,7 @@ In order to run this project locally, follow these steps:
 
 1. **Clone the repository:**
 Open your terminal and run:
-`git clone <insert-the-github-repo-link>`
+`git clone https://github.com/chanzelh/Smart_Event_and_Ticketing_Platform.git`
 
 2. **Navigate to the project folder:**
 `cd Smart_Event_and_Ticketing_Platform`
