@@ -40,53 +40,41 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
-        
-        // Find user and normalize email to lowercase
-        const foundUser = await User.findOne({ username: username.toLowerCase() });
+        const identifier = (username || "").toLowerCase().trim();
 
-        // Validate User & Password
-        if (foundUser && await bcrypt.compare(password, foundUser.password)) {
-            
-            // Set Session (Use 'foundUser' because 'user' was causing the ReferenceError)
-            req.session.user = { 
-                id: foundUser._id, 
-                role: foundUser.role, 
-                fullName: foundUser.fullName 
-            };
+        // CHANGE: Query 'email' instead of 'username'
+        const foundUser = await User.findOne({ email: identifier });
 
-            // Role-Based Redirects (MUST be inside this success block)
-            // Using toLowerCase() here makes our code safer against DB typos
-            const role = foundUser.role.toLowerCase();
+        if (foundUser) {
+            const isMatch = await bcrypt.compare(password, foundUser.password);
 
-            if (role === 'admin') {
-                return res.redirect('/admin/dashboard');
+            if (isMatch) {
+                req.session.user = { 
+                    id: foundUser._id, 
+                    role: foundUser.role, 
+                    fullName: foundUser.fullName 
+                };
+
+                const role = foundUser.role.toLowerCase();
+                if (role === 'admin') return res.redirect('/admin/dashboard');
+                if (role === 'merchant') return res.redirect('/admin/merchant/dashboard');
+                
+                return res.redirect('/'); 
             }
-
-            if (role === 'merchant') {
-                return res.redirect('/admin/merchant/dashboard');
-            }
-
-            // Default redirect for normal users
-            return res.redirect('/'); 
-
-        } else {
-            // Handle Invalid Credentials
-            // Using 'return' ensures the code STOPS here
-            return res.render('auth/auth', { 
-                error: "Invalid email or password.", 
-                success: null 
-            });
         }
+
+        // If we reach here, either user wasn't found OR password didn't match
+        return res.render('auth/auth', { 
+            error: "Invalid email or password.", 
+            success: null 
+        });
+
     } catch (error) {
         console.error("CRITICAL LOGIN ERROR:", error);
-        
-        // Safety check: Only send an error response if we haven't already
-        if (!res.headersSent) {
-            return res.status(500).render('auth/auth', { 
-                error: "A server error occurred. Please try again.", 
-                success: null 
-            });
-        }
+        return res.status(500).render('auth/auth', { 
+            error: "A server error occurred.", 
+            success: null 
+        });
     }
 };
 
